@@ -7,6 +7,10 @@ export async function getAccessTokenFromCookies() {
   return (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
 }
 
+export async function getRefreshTokenFromCookies() {
+  return (await cookies()).get(REFRESH_COOKIE)?.value ?? null;
+}
+
 export async function setAuthCookies(session: {
   access_token: string;
   refresh_token: string;
@@ -22,7 +26,7 @@ export async function setAuthCookies(session: {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge
+    maxAge,
   });
 
   cookieStore.set(REFRESH_COOKIE, session.refresh_token, {
@@ -30,7 +34,7 @@ export async function setAuthCookies(session: {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30
+    maxAge: 60 * 60 * 24 * 30,
   });
 }
 

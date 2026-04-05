@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -24,29 +25,35 @@ async function signupAction(formData: FormData) {
     redirect(`/signup?error=${encodeURIComponent(error?.message ?? "Unable to create account")}`);
   }
 
-  // We upsert profile on every signup request so retries are safe and never duplicate.
+  // Upsert profile — safe for retries and never duplicates.
   const admin = createAdminSupabaseClient();
   const { error: profileError } = await admin.from("customer_profiles").upsert(
     {
       user_id: data.user.id,
       full_name: fullName,
-      phone: phone || null
+      phone: phone || null,
     },
     { onConflict: "user_id" }
   );
 
   if (profileError) {
-    redirect(`/signup?error=${encodeURIComponent("Account created but profile setup failed. Please contact support.")}`);
+    redirect(`/signup?error=${encodeURIComponent("Account created but profile setup failed. Please sign in and update your profile.")}`);
   }
 
   if (data.session) {
     await setAuthCookies(data.session);
+    redirect("/dashboard");
   }
 
-  redirect("/dashboard");
+  // Email confirmation may be required — no session returned
+  redirect(`/login?error=${encodeURIComponent("Please check your email to confirm your account, then sign in.")}`);
 }
 
-export default async function SignupPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const user = await getUser();
   if (user) {
     redirect("/dashboard");
@@ -59,22 +66,55 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
       <form action={signupAction} className="surface mx-auto max-w-md space-y-4 rounded-premium p-6 md:p-8">
         <label className="block text-sm text-white/75">
           <span className="mb-2 block">Full name</span>
-          <input name="full_name" required className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 outline-none ring-electric focus:ring-1" />
+          <input
+            name="full_name"
+            required
+            autoComplete="name"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 outline-none ring-electric focus:ring-1"
+          />
         </label>
         <label className="block text-sm text-white/75">
           <span className="mb-2 block">Phone (optional)</span>
-          <input name="phone" className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 outline-none ring-electric focus:ring-1" />
+          <input
+            name="phone"
+            autoComplete="tel"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 outline-none ring-electric focus:ring-1"
+          />
         </label>
         <label className="block text-sm text-white/75">
           <span className="mb-2 block">Email</span>
-          <input name="email" type="email" required className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 outline-none ring-electric focus:ring-1" />
+          <input
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 outline-none ring-electric focus:ring-1"
+          />
         </label>
         <label className="block text-sm text-white/75">
           <span className="mb-2 block">Password</span>
-          <input name="password" type="password" required minLength={8} className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 outline-none ring-electric focus:ring-1" />
+          <input
+            name="password"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 outline-none ring-electric focus:ring-1"
+          />
         </label>
         {params.error ? <p className="text-sm text-red-300">{params.error}</p> : null}
-        <button type="submit" className="inline-flex w-full items-center justify-center rounded-xl bg-silver px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white">Create account</button>
+        <button
+          type="submit"
+          className="inline-flex w-full items-center justify-center rounded-xl bg-silver px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white"
+        >
+          Create account
+        </button>
+        <p className="text-center text-sm text-white/50">
+          Already have an account?{" "}
+          <Link href="/login" className="text-white/80 underline hover:text-white">
+            Sign in
+          </Link>
+        </p>
       </form>
     </PremiumSection>
   );

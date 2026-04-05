@@ -11,8 +11,10 @@ export function FeatureCard({ feature }: { feature: Feature }) {
         <p>Estimated session: {feature.sessionMinutes} min</p>
       </div>
       <div className="mt-5 flex items-center justify-between">
-        <p className="text-sm">From <span className="font-semibold text-white">${feature.priceUsd}</span></p>
-        <Button href={`/checkout/${feature.id}`}>Select</Button>
+        <p className="text-sm">
+          From <span className="font-semibold text-white">${feature.priceUsd}</span>
+        </p>
+        <Button href="/check-compatibility">Check Compatibility</Button>
       </div>
     </article>
   );

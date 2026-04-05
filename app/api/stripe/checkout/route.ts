@@ -6,20 +6,21 @@ import { createCheckoutSession } from "@/lib/stripe/create-checkout-session";
 export async function POST(request: NextRequest) {
   try {
     const user = await getUser();
-
     if (!user) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
-    const { orderId } = (await request.json()) as { orderId?: string };
 
-    if (!orderId) {
-      return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
+    const body = await request.json().catch(() => null);
+    const orderId = (body as { orderId?: string } | null)?.orderId;
+
+    if (!orderId || typeof orderId !== "string") {
+      return NextResponse.json({ error: "Missing or invalid orderId" }, { status: 400 });
     }
 
     const supabase = createAdminSupabaseClient();
     const { data: order, error } = await supabase
       .from("orders")
-      .select("id, total_usd, customer_id")
+      .select("id, total_usd, customer_id, payment_status")
       .eq("id", orderId)
       .eq("customer_id", user.id)
       .single();
@@ -28,20 +29,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    if (order.payment_status === "paid") {
+      return NextResponse.json({ error: "This order has already been paid" }, { status: 400 });
+    }
+
     const session = await createCheckoutSession({
       orderId: order.id,
       totalUsd: order.total_usd,
-      customerId: order.customer_id
+      customerId: order.customer_id,
     });
 
+    // Store the checkout session ID on the order
     await supabase
       .from("orders")
       .update({ stripe_checkout_session_id: session.id })
       .eq("id", order.id);
 
     return NextResponse.json({ id: session.id, url: session.url });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to create checkout session";
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unable to create checkout session";
+    console.error("[stripe/checkout]", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -23,6 +23,7 @@ export interface Database {
           phone?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       vehicles: {
         Row: {
@@ -46,15 +47,16 @@ export interface Database {
           head_unit?: string | null;
           vin?: string | null;
         };
-        Update: Partial<{
-          brand: string;
-          model: string;
-          year: number;
-          chassis: string;
-          head_unit: string | null;
-          vin: string | null;
-          updated_at: string;
-        }>;
+        Update: {
+          brand?: string;
+          model?: string;
+          year?: number;
+          chassis?: string;
+          head_unit?: string | null;
+          vin?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       supported_vehicle_configs: {
         Row: {
@@ -62,12 +64,30 @@ export interface Database {
           brand: string;
           model: string;
           chassis: string;
-          head_unit: string;
+          head_unit: string | null;
           min_year: number;
           max_year: number;
           created_at: string;
           updated_at: string;
         };
+        Insert: {
+          brand: string;
+          model: string;
+          chassis: string;
+          head_unit?: string | null;
+          min_year: number;
+          max_year: number;
+        };
+        Update: {
+          brand?: string;
+          model?: string;
+          chassis?: string;
+          head_unit?: string | null;
+          min_year?: number;
+          max_year?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       features: {
         Row: {
@@ -80,6 +100,22 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
+        Insert: {
+          brand: string;
+          title: string;
+          description: string;
+          session_minutes: number;
+          base_price_usd: number;
+        };
+        Update: {
+          brand?: string;
+          title?: string;
+          description?: string;
+          session_minutes?: number;
+          base_price_usd?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       feature_compatibility_rules: {
         Row: {
@@ -88,6 +124,28 @@ export interface Database {
           config_id: string;
           created_at: string;
         };
+        Insert: {
+          feature_id: string;
+          config_id: string;
+        };
+        Update: {
+          feature_id?: string;
+          config_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "feature_compatibility_rules_feature_id_fkey";
+            columns: ["feature_id"];
+            referencedRelation: "features";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "feature_compatibility_rules_config_id_fkey";
+            columns: ["config_id"];
+            referencedRelation: "supported_vehicle_configs";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       orders: {
         Row: {
@@ -111,14 +169,22 @@ export interface Database {
           stripe_checkout_session_id?: string | null;
           stripe_payment_intent_id?: string | null;
         };
-        Update: Partial<{
-          status: OrderStatus;
-          payment_status: PaymentStatus;
-          total_usd: number;
-          stripe_checkout_session_id: string | null;
-          stripe_payment_intent_id: string | null;
-          updated_at: string;
-        }>;
+        Update: {
+          status?: OrderStatus;
+          payment_status?: PaymentStatus;
+          total_usd?: number;
+          stripe_checkout_session_id?: string | null;
+          stripe_payment_intent_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "orders_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       order_items: {
         Row: {
@@ -133,6 +199,25 @@ export interface Database {
           feature_id: string;
           price_usd: number;
         };
+        Update: {
+          order_id?: string;
+          feature_id?: string;
+          price_usd?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey";
+            columns: ["order_id"];
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "order_items_feature_id_fkey";
+            columns: ["feature_id"];
+            referencedRelation: "features";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       bookings: {
         Row: {
@@ -152,13 +237,21 @@ export interface Database {
           technician_id?: string | null;
           remote_session_link?: string | null;
         };
-        Update: Partial<{
-          starts_at: string | null;
-          status: BookingStatus;
-          technician_id: string | null;
-          remote_session_link: string | null;
-          updated_at: string;
-        }>;
+        Update: {
+          starts_at?: string | null;
+          status?: BookingStatus;
+          technician_id?: string | null;
+          remote_session_link?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "bookings_order_id_fkey";
+            columns: ["order_id"];
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       setup_requirements: {
         Row: {
@@ -173,6 +266,18 @@ export interface Database {
           requirement: string;
           completed?: boolean;
         };
+        Update: {
+          requirement?: string;
+          completed?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "setup_requirements_booking_id_fkey";
+            columns: ["booking_id"];
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       technician_notes: {
         Row: {
@@ -182,8 +287,28 @@ export interface Database {
           note: string;
           created_at: string;
         };
+        Insert: {
+          booking_id: string;
+          technician_id: string;
+          note: string;
+        };
+        Update: {
+          note?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "technician_notes_booking_id_fkey";
+            columns: ["booking_id"];
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
 

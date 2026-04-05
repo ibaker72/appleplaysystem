@@ -2,31 +2,55 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { CompatibilityInput, CompatibilityResult } from "@/types/compatibility";
 
 export async function getCompatibleFeatures(input: CompatibilityInput): Promise<CompatibilityResult> {
+  // Early guard: only BMW is currently supported
+  if (input.brand !== "BMW") {
+    return {
+      supported: false,
+      status: "not_supported",
+      reason: `${input.brand} support is coming soon. Currently only BMW is available.`,
+      compatibleFeatures: [],
+      estimatedSessionMinutes: 0,
+      estimatedTotalUsd: 0,
+    };
+  }
+
   const supabase = await createServerSupabaseClient();
 
-  const { data: config, error: configError } = await supabase
+  // Build the config query. head_unit may be null in the DB for configs that
+  // support any head unit, so we match either exact or null.
+  let configQuery = supabase
     .from("supported_vehicle_configs")
     .select("id, brand, model, chassis, head_unit, min_year, max_year")
     .eq("brand", input.brand)
     .eq("model", input.model)
     .eq("chassis", input.chassis)
-    .eq("head_unit", input.headUnit)
     .lte("min_year", input.year)
-    .gte("max_year", input.year)
-    .maybeSingle();
+    .gte("max_year", input.year);
+
+  // Only filter by head_unit if the user specified one
+  if (input.headUnit && input.headUnit.trim()) {
+    configQuery = configQuery.or(`head_unit.eq.${input.headUnit},head_unit.is.null`);
+  }
+
+  const { data: configs, error: configError } = await configQuery;
 
   if (configError) {
     throw new Error(`Failed to query compatibility: ${configError.message}`);
   }
 
+  // Prefer an exact head_unit match over a null (wildcard) match
+  const config = configs?.find((c) => c.head_unit === input.headUnit)
+    ?? configs?.find((c) => c.head_unit === null)
+    ?? null;
+
   if (!config) {
     return {
       supported: false,
       status: "not_supported",
-      reason: "No supported vehicle configuration matched your inputs.",
+      reason: "No supported vehicle configuration matched your inputs. Check your chassis code and head unit.",
       compatibleFeatures: [],
       estimatedSessionMinutes: 0,
-      estimatedTotalUsd: 0
+      estimatedTotalUsd: 0,
     };
   }
 
@@ -45,29 +69,48 @@ export async function getCompatibleFeatures(input: CompatibilityInput): Promise<
   const compatibleFeatures = (rules ?? []).map((rule) => {
     const feature = Array.isArray(rule.features) ? rule.features[0] : rule.features;
     return {
-      id: feature.id,
-      title: feature.title,
-      description: feature.description,
-      sessionMinutes: feature.session_minutes,
-      basePriceUsd: feature.base_price_usd
+      id: feature.id as string,
+      title: feature.title as string,
+      description: feature.description as string,
+      sessionMinutes: feature.session_minutes as number,
+      basePriceUsd: feature.base_price_usd as number,
     };
   });
 
+  if (compatibleFeatures.length === 0) {
+    return {
+      supported: false,
+      status: "not_supported",
+      reason: "Your vehicle configuration is recognized, but no compatible features are currently available.",
+      matchedConfigId: config.id,
+      matchedConfig: {
+        brand: config.brand,
+        model: config.model,
+        chassis: config.chassis,
+        headUnit: config.head_unit ?? "",
+        minYear: config.min_year,
+        maxYear: config.max_year,
+      },
+      compatibleFeatures: [],
+      estimatedSessionMinutes: 0,
+      estimatedTotalUsd: 0,
+    };
+  }
+
   return {
-    supported: compatibleFeatures.length > 0,
-    status: compatibleFeatures.length > 0 ? "compatible" : "not_supported",
-    reason: compatibleFeatures.length > 0 ? undefined : "No compatible features were found for this exact configuration.",
+    supported: true,
+    status: "compatible",
     matchedConfigId: config.id,
     matchedConfig: {
       brand: config.brand,
       model: config.model,
       chassis: config.chassis,
-      headUnit: config.head_unit,
+      headUnit: config.head_unit ?? "",
       minYear: config.min_year,
-      maxYear: config.max_year
+      maxYear: config.max_year,
     },
     compatibleFeatures,
-    estimatedSessionMinutes: compatibleFeatures.reduce((sum, feature) => sum + feature.sessionMinutes, 0),
-    estimatedTotalUsd: compatibleFeatures.reduce((sum, feature) => sum + feature.basePriceUsd, 0)
+    estimatedSessionMinutes: compatibleFeatures.reduce((sum, f) => sum + f.sessionMinutes, 0),
+    estimatedTotalUsd: compatibleFeatures.reduce((sum, f) => sum + f.basePriceUsd, 0),
   };
 }

@@ -18,3 +18,14 @@ body {
 .container-shell {
   @apply mx-auto w-full max-w-7xl px-5 md:px-8;
 }
+
+/* Ensure select dropdowns look premium in dark mode */
+select option {
+  background-color: #10131a;
+  color: #d7dde8;
+}
+
+/* Prevent horizontal overflow on small screens */
+html {
+  overflow-x: hidden;
+}

@@ -17,7 +17,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing Stripe signature" }, { status: 400 });
     }
 
-    const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    let event: Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Signature verification failed";
+      console.error("[stripe/webhook] Signature verification failed:", msg);
+      return NextResponse.json({ error: msg }, { status: 400 });
+    }
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
@@ -25,24 +32,37 @@ export async function POST(request: Request) {
 
       if (orderId) {
         const supabase = createAdminSupabaseClient();
-        await supabase
-          .from("orders")
-          .update({
-            payment_status: "paid",
-            status: "confirmed",
-            stripe_checkout_session_id: session.id,
-            stripe_payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : null
-          })
-          .eq("id", orderId);
 
-        await createBookingForOrder(orderId);
+        // Idempotency: only update if not already paid
+        const { data: order } = await supabase
+          .from("orders")
+          .select("id, payment_status")
+          .eq("id", orderId)
+          .single();
+
+        if (order && order.payment_status !== "paid") {
+          await supabase
+            .from("orders")
+            .update({
+              payment_status: "paid",
+              status: "confirmed",
+              stripe_checkout_session_id: session.id,
+              stripe_payment_intent_id:
+                typeof session.payment_intent === "string" ? session.payment_intent : null,
+            })
+            .eq("id", orderId);
+
+          // createBookingForOrder is already idempotent (checks for existing booking)
+          await createBookingForOrder(orderId);
+        }
       }
     }
 
     return NextResponse.json({ received: true });
-  } catch (error) {
+  } catch (err) {
+    console.error("[stripe/webhook] Processing error:", err instanceof Error ? err.message : err);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Webhook processing failed" },
+      { error: err instanceof Error ? err.message : "Webhook processing failed" },
       { status: 400 }
     );
   }
