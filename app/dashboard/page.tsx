@@ -6,6 +6,13 @@ import { getUserVehicles } from "@/lib/vehicles/save-vehicle";
 import { getUserOrders } from "@/lib/orders/get-user-orders";
 import { getUserBookings } from "@/lib/bookings/get-user-bookings";
 
+interface ChecklistStep {
+  label: string;
+  done: boolean;
+  href: string;
+  cta: string;
+}
+
 export default async function DashboardPage() {
   const user = await requireUser("/dashboard");
 
@@ -30,32 +37,121 @@ export default async function DashboardPage() {
   const checklist = setupReqs ?? [];
   const completed = checklist.filter((item) => item.completed).length;
 
+  const hasPaidOrder = orders.some((o) => o.payment_status === "paid");
+  const hasBooking = bookings.length > 0;
+  const isFirstUser = vehicles.length === 0 && orders.length === 0;
+
+  const onboardingSteps: ChecklistStep[] = [
+    { label: "Check vehicle compatibility", done: vehicles.length > 0, href: "/check-compatibility", cta: "Check now" },
+    { label: "Save your vehicle", done: vehicles.length > 0, href: "/dashboard/vehicles", cta: "Add vehicle" },
+    { label: "Choose features to unlock", done: orders.length > 0, href: "/features", cta: "Browse features" },
+    { label: "Complete checkout", done: hasPaidOrder, href: "/dashboard/orders", cta: "View orders" },
+    { label: "Book your remote session", done: hasBooking, href: "/dashboard/sessions", cta: "View sessions" },
+  ];
+
+  const stepsCompleted = onboardingSteps.filter((s) => s.done).length;
+  const allDone = stepsCompleted === onboardingSteps.length;
+  const nextStep = onboardingSteps.find((s) => !s.done);
+
   return (
     <DashboardShell title="Owner Dashboard">
+      {/* Onboarding card for new / incomplete users */}
+      {!allDone && (
+        <div className="surface rounded-premium p-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">
+                {isFirstUser ? "Welcome — let\u2019s get started" : "Getting started"}
+              </h3>
+              <p className="mt-1 text-sm text-white/60">
+                {isFirstUser
+                  ? "Follow these steps to unlock premium features on your vehicle."
+                  : `${stepsCompleted} of ${onboardingSteps.length} steps complete`}
+              </p>
+            </div>
+            {!isFirstUser && (
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70">
+                {Math.round((stepsCompleted / onboardingSteps.length) * 100)}%
+              </span>
+            )}
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-emerald-400 transition-all"
+              style={{ width: `${(stepsCompleted / onboardingSteps.length) * 100}%` }}
+            />
+          </div>
+
+          {/* Steps */}
+          <ol className="mt-4 space-y-2">
+            {onboardingSteps.map((step, i) => (
+              <li key={step.label} className="flex items-center justify-between rounded-lg px-3 py-2 text-sm">
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                      step.done
+                        ? "bg-emerald-400/20 text-emerald-300"
+                        : "bg-white/10 text-white/50"
+                    }`}
+                  >
+                    {step.done ? "\u2713" : i + 1}
+                  </span>
+                  <span className={step.done ? "text-white/50 line-through" : "text-white/80"}>
+                    {step.label}
+                  </span>
+                </div>
+                {!step.done && (
+                  <Link
+                    href={step.href}
+                    className="rounded-lg bg-white/10 px-3 py-1 text-xs font-medium text-white/80 transition hover:bg-white/20"
+                  >
+                    {step.cta}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ol>
+
+          {/* Primary CTA for first step */}
+          {nextStep && isFirstUser && (
+            <Link
+              href={nextStep.href}
+              className="mt-5 inline-block rounded-xl bg-silver px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white"
+            >
+              {nextStep.cta} →
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Summary cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <div className="surface rounded-premium p-5">
           <p className="text-sm text-white/60">Saved vehicles</p>
           <p className="mt-2 text-3xl font-semibold">{vehicles.length}</p>
           <Link href="/dashboard/vehicles" className="mt-2 inline-block text-sm text-white/70 hover:text-white">
-            Manage vehicles →
+            {vehicles.length === 0 ? "Add your first vehicle →" : "Manage vehicles →"}
           </Link>
         </div>
         <div className="surface rounded-premium p-5">
           <p className="text-sm text-white/60">Orders</p>
           <p className="mt-2 text-3xl font-semibold">{orders.length}</p>
           <Link href="/dashboard/orders" className="mt-2 inline-block text-sm text-white/70 hover:text-white">
-            View orders →
+            {orders.length === 0 ? "Browse features →" : "View orders →"}
           </Link>
         </div>
         <div className="surface rounded-premium p-5">
           <p className="text-sm text-white/60">Sessions</p>
           <p className="mt-2 text-3xl font-semibold">{bookings.length}</p>
           <Link href="/dashboard/sessions" className="mt-2 inline-block text-sm text-white/70 hover:text-white">
-            View sessions →
+            {bookings.length === 0 ? "Complete an order first →" : "View sessions →"}
           </Link>
         </div>
       </div>
 
+      {/* Upcoming session */}
       {nextBooking ? (
         <div className="surface rounded-premium p-5">
           <h3 className="text-lg font-medium">Upcoming session</h3>
@@ -85,23 +181,11 @@ export default async function DashboardPage() {
             Open setup instructions
           </Link>
         </div>
-      ) : (
+      ) : !isFirstUser ? (
         <EmptyState
           title="No upcoming sessions"
           description="Complete checkout on an order and your next session will appear here."
         />
-      )}
-
-      {vehicles.length === 0 && orders.length === 0 ? (
-        <div className="surface rounded-premium p-6 text-center">
-          <p className="text-sm text-white/60">Ready to get started?</p>
-          <Link
-            href="/check-compatibility"
-            className="mt-3 inline-block rounded-xl bg-silver px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white"
-          >
-            Check vehicle compatibility
-          </Link>
-        </div>
       ) : null}
     </DashboardShell>
   );

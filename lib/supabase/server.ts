@@ -1,14 +1,27 @@
-import { createClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import type { Database } from "@/types/database";
 import { getSupabasePublicEnv } from "@/lib/env";
-import { getAccessTokenFromCookies } from "@/lib/auth/session";
 
 export async function createServerSupabaseClient() {
   const { url, anonKey } = getSupabasePublicEnv();
-  const accessToken = await getAccessTokenFromCookies();
+  const cookieStore = await cookies();
 
-  return createClient<Database>(url, anonKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : undefined,
+  return createServerClient<Database>(url, anonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          for (const { name, value, options } of cookiesToSet) {
+            cookieStore.set(name, value, options);
+          }
+        } catch {
+          // setAll can throw in Server Components (read-only context).
+          // Token refresh will be picked up on the next request.
+        }
+      },
+    },
   });
 }

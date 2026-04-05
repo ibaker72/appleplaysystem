@@ -1,22 +1,34 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
-import { setAuthCookies } from "@/lib/auth/session";
 import { getUser } from "@/lib/auth/get-user";
+
+const signupSchema = z.object({
+  full_name: z.string().trim().min(1, "Full name is required").max(200),
+  phone: z.string().trim().max(30).optional().default(""),
+  email: z.string().trim().email("Please enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
 
 async function signupAction(formData: FormData) {
   "use server";
 
-  const fullName = String(formData.get("full_name") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const password = String(formData.get("password") ?? "").trim();
+  const parsed = signupSchema.safeParse({
+    full_name: formData.get("full_name"),
+    phone: formData.get("phone"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
 
-  if (!fullName || !email || !password) {
-    redirect(`/signup?error=${encodeURIComponent("Full name, email and password are required")}`);
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? "Invalid input";
+    redirect(`/signup?error=${encodeURIComponent(msg)}`);
   }
+
+  const { full_name: fullName, phone, email, password } = parsed.data;
 
   const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase.auth.signUp({ email, password });
@@ -41,7 +53,7 @@ async function signupAction(formData: FormData) {
   }
 
   if (data.session) {
-    await setAuthCookies(data.session);
+    // @supabase/ssr handles cookie setting via createServerSupabaseClient
     redirect("/dashboard");
   }
 

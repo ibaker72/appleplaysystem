@@ -1,30 +1,41 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { setAuthCookies } from "@/lib/auth/session";
 import { getUser } from "@/lib/auth/get-user";
+
+const loginSchema = z.object({
+  email: z.string().trim().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+  next: z.string().startsWith("/").default("/dashboard"),
+});
 
 async function loginAction(formData: FormData) {
   "use server";
 
-  const email = String(formData.get("email") ?? "").trim();
-  const password = String(formData.get("password") ?? "").trim();
-  const next = String(formData.get("next") ?? "/dashboard");
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+    next: formData.get("next") || "/dashboard",
+  });
 
-  if (!email || !password) {
-    redirect(`/login?error=${encodeURIComponent("Email and password are required")}&next=${encodeURIComponent(next)}`);
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? "Invalid input";
+    const next = String(formData.get("next") ?? "/dashboard");
+    redirect(`/login?error=${encodeURIComponent(msg)}&next=${encodeURIComponent(next)}`);
   }
+
+  const { email, password, next } = parsed.data;
 
   const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error || !data.session) {
-    redirect(`/login?error=${encodeURIComponent(error?.message ?? "Unable to sign in")}&next=${encodeURIComponent(next)}`);
+  if (error) {
+    redirect(`/login?error=${encodeURIComponent(error.message)}&next=${encodeURIComponent(next)}`);
   }
 
-  await setAuthCookies(data.session);
-  redirect(next.startsWith("/") ? next : "/dashboard");
+  redirect(next);
 }
 
 export default async function LoginPage({

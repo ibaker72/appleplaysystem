@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "@/types/database";
 
 export function createBrowserSupabaseClient() {
@@ -11,7 +11,5 @@ export function createBrowserSupabaseClient() {
     throw new Error("[supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
   }
 
-  return createClient<Database>(url, anonKey, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-  });
+  return createBrowserClient<Database>(url, anonKey);
 }

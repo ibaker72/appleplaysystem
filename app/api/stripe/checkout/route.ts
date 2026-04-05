@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { getUser } from "@/lib/auth/get-user";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/create-checkout-session";
+
+const checkoutSchema = z.object({
+  orderId: z.string().uuid("Invalid order ID"),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,11 +16,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => null);
-    const orderId = (body as { orderId?: string } | null)?.orderId;
+    const parsed = checkoutSchema.safeParse(body);
 
-    if (!orderId || typeof orderId !== "string") {
-      return NextResponse.json({ error: "Missing or invalid orderId" }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid input" }, { status: 400 });
     }
+
+    const { orderId } = parsed.data;
 
     const supabase = createAdminSupabaseClient();
     const { data: order, error } = await supabase
