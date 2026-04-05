@@ -1,8 +1,12 @@
 import { AdminDataTable } from "@/components/admin/AdminDataTable";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { bookings } from "@/lib/data/mock";
+import { requireUser } from "@/lib/auth/require-user";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
-export default function AdminSessionsPage() {
-  const rows = bookings.map((booking) => ({ id: booking.id, orderId: booking.orderId, startsAt: new Date(booking.startsAt).toLocaleString(), technician: booking.technicianName, status: booking.status }));
+export default async function AdminSessionsPage() {
+  await requireUser("/admin/sessions");
+  const supabase = createAdminSupabaseClient();
+  const { data } = await supabase.from("bookings").select("id, order_id, starts_at, technician_id, status").order("created_at", { ascending: false });
+  const rows = (data ?? []).map((booking) => ({ id: booking.id.slice(0, 8), orderId: booking.order_id.slice(0, 8), startsAt: booking.starts_at ? new Date(booking.starts_at).toLocaleString() : "Pending", technician: booking.technician_id?.slice(0, 8) ?? "Unassigned", status: booking.status }));
   return <DashboardShell title="Admin · Sessions"><AdminDataTable title="Sessions" rows={rows} columns={[{ key: "id", label: "Session" }, { key: "orderId", label: "Order" }, { key: "startsAt", label: "Time" }, { key: "technician", label: "Technician" }, { key: "status", label: "Status" }]} /></DashboardShell>;
 }

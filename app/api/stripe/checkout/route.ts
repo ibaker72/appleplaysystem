@@ -1,26 +1,47 @@
-import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe/client";
+import { NextRequest, NextResponse } from "next/server";
+import { getUser } from "@/lib/auth/get-user";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { createCheckoutSession } from "@/lib/stripe/create-checkout-session";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: { name: "Remote Feature Unlock Session" },
-            unit_amount: 12900
-          },
-          quantity: 1
-        }
-      ],
-      success_url: "http://localhost:3000/dashboard/orders",
-      cancel_url: "http://localhost:3000/pricing"
+    const user = await getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+    const { orderId } = (await request.json()) as { orderId?: string };
+
+    if (!orderId) {
+      return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
+    }
+
+    const supabase = createAdminSupabaseClient();
+    const { data: order, error } = await supabase
+      .from("orders")
+      .select("id, total_usd, customer_id")
+      .eq("id", orderId)
+      .eq("customer_id", user.id)
+      .single();
+
+    if (error || !order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    const session = await createCheckoutSession({
+      orderId: order.id,
+      totalUsd: order.total_usd,
+      customerId: order.customer_id
     });
 
+    await supabase
+      .from("orders")
+      .update({ stripe_checkout_session_id: session.id })
+      .eq("id", order.id);
+
     return NextResponse.json({ id: session.id, url: session.url });
-  } catch {
-    return NextResponse.json({ error: "Unable to create checkout session" }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to create checkout session";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

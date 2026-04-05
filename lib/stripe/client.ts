@@ -1,5 +1,7 @@
 import Stripe from "stripe";
+import { getStripeEnv } from "@/lib/env";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "sk_test_placeholder", {
-  apiVersion: "2025-02-24.acacia"
-});
+export function getStripeClient() {
+  const { secretKey } = getStripeEnv();
+  return new Stripe(secretKey, { apiVersion: "2025-02-24.acacia" });
+}
