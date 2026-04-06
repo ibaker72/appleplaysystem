@@ -76,3 +76,11 @@ Production-minded MVP foundation built with Next.js App Router, TypeScript, Tail
 npm install
 npm run dev
 ```
+
+### Database migrations
+Run the following SQL files against your Supabase project in order:
+
+1. `supabase/schema.sql` — base tables and constraints
+2. `supabase/rls-policies.sql` — row-level security policies
+3. `supabase/indexes-and-triggers.sql` — performance indexes and `updated_at` triggers
+4. `supabase/seed.sql` — sample BMW vehicle configs, features, and compatibility rules
