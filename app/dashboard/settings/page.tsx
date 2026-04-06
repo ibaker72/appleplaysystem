@@ -30,13 +30,8 @@ async function updateProfileAction(formData: FormData) {
   revalidatePath("/dashboard/settings");
 }
 
-export default async function SettingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | undefined>>;
-}) {
+export default async function SettingsPage() {
   const user = await requireUser("/dashboard/settings");
-  const params = await searchParams;
   const supabase = createAdminSupabaseClient();
   const { data: profile } = await supabase
     .from("customer_profiles")
@@ -46,12 +41,6 @@ export default async function SettingsPage({
 
   return (
     <DashboardShell title="Settings">
-      {params.updated === "1" ? (
-        <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-200">
-          Profile updated.
-        </div>
-      ) : null}
-
       <form action={updateProfileAction} className="surface max-w-lg space-y-4 rounded-premium p-5">
         <p className="text-sm text-white/60">Signed in as {user.email}</p>
         <label className="block text-sm text-white/75">

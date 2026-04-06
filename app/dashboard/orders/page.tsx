@@ -20,33 +20,12 @@ const statusStyles: Record<string, string> = {
   cancelled: "bg-red-400/15 text-red-200",
 };
 
-export default async function OrdersPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | undefined>>;
-}) {
+export default async function OrdersPage() {
   const user = await requireUser("/dashboard/orders");
   const orders = await getUserOrders(user.id);
-  const params = await searchParams;
 
   return (
     <DashboardShell title="Orders">
-      {params.checkout === "success" ? (
-        <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-200">
-          Payment confirmed. Your session booking is being prepared.
-        </div>
-      ) : null}
-      {params.checkout === "cancelled" ? (
-        <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-200">
-          Checkout was cancelled. You can pay anytime from this page.
-        </div>
-      ) : null}
-      {params.created ? (
-        <div className="rounded-xl border border-electric/20 bg-electric/10 p-4 text-sm text-electric">
-          Order created. Complete checkout to begin your session.
-        </div>
-      ) : null}
-
       {orders.length === 0 ? (
         <EmptyState title="No orders yet" description="Build your first compatible package to create an order." />
       ) : null}

@@ -4,23 +4,12 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { requireUser } from "@/lib/auth/require-user";
 import { getUserVehicles } from "@/lib/vehicles/save-vehicle";
 
-export default async function VehiclesPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | undefined>>;
-}) {
+export default async function VehiclesPage() {
   const user = await requireUser("/dashboard/vehicles");
   const vehicles = await getUserVehicles(user.id);
-  const params = await searchParams;
 
   return (
     <DashboardShell title="Vehicles">
-      {params.saved === "1" ? (
-        <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-200">
-          Vehicle saved to your dashboard.
-        </div>
-      ) : null}
-
       {vehicles.length === 0 ? (
         <EmptyState title="No vehicles saved" description="Save your vehicle from the compatibility checker to manage it here." />
       ) : null}
