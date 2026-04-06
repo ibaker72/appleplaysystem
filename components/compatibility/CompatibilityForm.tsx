@@ -1,17 +1,24 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-const brandOptions = ["BMW"];
-const modelOptions: Record<string, string[]> = {
+// Hardcoded fallback defaults in case the API fetch fails
+const fallbackBrands = ["BMW"];
+const fallbackModels: Record<string, string[]> = {
   BMW: ["1 Series", "2 Series", "3 Series", "4 Series", "5 Series", "7 Series", "X1", "X3", "X5", "X7"],
 };
-const chassisOptions: Record<string, string[]> = {
+const fallbackChassis: Record<string, string[]> = {
   BMW: ["F20", "F22", "F30", "F32", "F48", "F10", "G20", "G22", "G30", "G01", "G05", "G07", "G70"],
 };
-const headUnitOptions = ["MGU", "NBT Evo", "EntryNav2", "NBT", "CIC"];
+const fallbackHeadUnits = ["MGU", "NBT Evo", "EntryNav2", "NBT", "CIC"];
+
+interface CompatibilityOptions {
+  brands: string[];
+  models: Record<string, string[]>;
+  chassis: Record<string, string[]>;
+  headUnits: string[];
+}
 
 const selectClass =
   "w-full appearance-none rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none ring-electric transition focus:ring-1";
@@ -19,7 +26,14 @@ const inputClass =
   "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none ring-electric transition focus:ring-1";
 
 export function CompatibilityForm() {
-  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [options, setOptions] = useState<CompatibilityOptions>({
+    brands: fallbackBrands,
+    models: fallbackModels,
+    chassis: fallbackChassis,
+    headUnits: fallbackHeadUnits,
+  });
+
   const [form, setForm] = useState({
     brand: "BMW",
     model: "3 Series",
@@ -29,9 +43,24 @@ export function CompatibilityForm() {
     vin: "",
   });
 
+  useEffect(() => {
+    fetch("/api/compatibility/options")
+      .then((res) => {
+        if (!res.ok) throw new Error("fetch failed");
+        return res.json();
+      })
+      .then((data: CompatibilityOptions) => {
+        setOptions(data);
+      })
+      .catch(() => {
+        // Keep fallback defaults
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   const query = useMemo(() => new URLSearchParams(form).toString(), [form]);
-  const models = modelOptions[form.brand] ?? [];
-  const chassisCodes = chassisOptions[form.brand] ?? [];
+  const models = options.models[form.brand] ?? [];
+  const chassisCodes = options.chassis[form.brand] ?? [];
 
   function update(key: string, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -39,21 +68,31 @@ export function CompatibilityForm() {
 
   return (
     <div className="surface rounded-premium p-6 md:p-8">
-      <div className="grid gap-4 md:grid-cols-2">
+      {loading ? (
+        <div className="flex items-center gap-2 py-4 text-sm text-white/50">
+          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
+          Loading vehicle options…
+        </div>
+      ) : null}
+      <div className={`grid gap-4 md:grid-cols-2 ${loading ? "pointer-events-none opacity-50" : ""}`}>
         <label className="text-sm">
           <span className="mb-2 block text-white/70">Brand</span>
           <select value={form.brand} onChange={(e) => update("brand", e.target.value)} className={selectClass}>
-            {brandOptions.map((b) => (
+            {options.brands.map((b) => (
               <option key={b} value={b} className="bg-panel">
                 {b}
               </option>
             ))}
-            <option value="Audi" disabled className="bg-panel">
-              Audi (coming soon)
-            </option>
-            <option value="Mercedes-Benz" disabled className="bg-panel">
-              Mercedes-Benz (coming soon)
-            </option>
+            {!options.brands.includes("Audi") && (
+              <option value="Audi" disabled className="bg-panel">
+                Audi (coming soon)
+              </option>
+            )}
+            {!options.brands.includes("Mercedes-Benz") && (
+              <option value="Mercedes-Benz" disabled className="bg-panel">
+                Mercedes-Benz (coming soon)
+              </option>
+            )}
           </select>
         </label>
 
@@ -95,7 +134,7 @@ export function CompatibilityForm() {
         <label className="text-sm">
           <span className="mb-2 block text-white/70">Head unit</span>
           <select value={form.headUnit} onChange={(e) => update("headUnit", e.target.value)} className={selectClass}>
-            {headUnitOptions.map((h) => (
+            {options.headUnits.map((h) => (
               <option key={h} value={h} className="bg-panel">
                 {h}
               </option>
