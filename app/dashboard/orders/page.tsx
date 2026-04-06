@@ -57,7 +57,9 @@ export default async function OrdersPage({
           className="surface flex flex-col justify-between gap-3 rounded-premium p-5 md:flex-row md:items-center"
         >
           <div>
-            <p className="font-medium">Order {order.id.slice(0, 8)}</p>
+            <Link href={`/dashboard/orders/${order.id}`} className="font-medium hover:underline">
+              Order {order.id.slice(0, 8)}
+            </Link>
             <p className="text-sm text-white/65">
               ${order.total_usd} · {new Date(order.created_at).toLocaleDateString()}
             </p>

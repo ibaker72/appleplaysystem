@@ -9,7 +9,7 @@ const modelOptions: Record<string, string[]> = {
   BMW: ["1 Series", "2 Series", "3 Series", "4 Series", "5 Series", "7 Series", "X1", "X3", "X5", "X7"],
 };
 const chassisOptions: Record<string, string[]> = {
-  BMW: ["F20", "F22", "F30", "F32", "F10", "G20", "G22", "G30", "G01", "G05", "G07", "G70"],
+  BMW: ["F20", "F22", "F30", "F32", "F48", "F10", "G20", "G22", "G30", "G01", "G05", "G07", "G70"],
 };
 const headUnitOptions = ["MGU", "NBT Evo", "EntryNav2", "NBT", "CIC"];
 

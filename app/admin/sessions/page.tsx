@@ -1,4 +1,4 @@
-import { AdminDataTable } from "@/components/admin/AdminDataTable";
+import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -12,27 +12,62 @@ export default async function AdminSessionsPage() {
     .order("created_at", { ascending: false })
     .limit(100);
 
-  const rows = (data ?? []).map((booking) => ({
-    id: booking.id.slice(0, 8),
-    orderId: booking.order_id.slice(0, 8),
-    startsAt: booking.starts_at ? new Date(booking.starts_at).toLocaleString() : "Pending",
-    technician: booking.technician_id?.slice(0, 8) ?? "Unassigned",
-    status: booking.status,
-  }));
+  const bookings = data ?? [];
 
   return (
     <DashboardShell title="Admin · Sessions">
-      <AdminDataTable
-        title="Sessions"
-        rows={rows}
-        columns={[
-          { key: "id", label: "Session" },
-          { key: "orderId", label: "Order" },
-          { key: "startsAt", label: "Time" },
-          { key: "technician", label: "Technician" },
-          { key: "status", label: "Status" },
-        ]}
-      />
+      <section className="surface rounded-premium p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-medium">Sessions</h2>
+          <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-white/50">
+            {bookings.length} {bookings.length === 1 ? "record" : "records"}
+          </span>
+        </div>
+
+        {bookings.length === 0 ? (
+          <p className="py-8 text-center text-sm text-white/40">No records found.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="text-white/55">
+                <tr>
+                  <th className="pb-3 pr-4 font-medium">Session</th>
+                  <th className="pb-3 pr-4 font-medium">Order</th>
+                  <th className="pb-3 pr-4 font-medium">Time</th>
+                  <th className="pb-3 pr-4 font-medium">Technician</th>
+                  <th className="pb-3 pr-4 font-medium">Status</th>
+                  <th className="pb-3 font-medium">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookings.map((booking) => (
+                  <tr key={booking.id} className="border-t border-white/5">
+                    <td className="py-3 pr-4">{booking.id.slice(0, 8)}</td>
+                    <td className="py-3 pr-4">{booking.order_id.slice(0, 8)}</td>
+                    <td className="py-3 pr-4">
+                      {booking.starts_at
+                        ? new Date(booking.starts_at).toLocaleString()
+                        : "Pending"}
+                    </td>
+                    <td className="py-3 pr-4">
+                      {booking.technician_id?.slice(0, 8) ?? "Unassigned"}
+                    </td>
+                    <td className="py-3 pr-4">{booking.status}</td>
+                    <td className="py-3">
+                      <Link
+                        href={`/admin/sessions/${booking.id}`}
+                        className="text-electric hover:underline"
+                      >
+                        View
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </DashboardShell>
   );
 }

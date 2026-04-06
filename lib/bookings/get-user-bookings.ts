@@ -6,6 +6,7 @@ export interface UserBooking {
   order_id: string;
   starts_at: string | null;
   status: string;
+  remote_session_link: string | null;
   setup_requirements: Array<{
     id: string;
     requirement: string;
@@ -23,6 +24,7 @@ export async function getUserBookings(customerId: string): Promise<UserBooking[]
       order_id,
       starts_at,
       status,
+      remote_session_link,
       orders!inner(customer_id),
       setup_requirements(id, requirement, completed)
     `)
@@ -38,6 +40,7 @@ export async function getUserBookings(customerId: string): Promise<UserBooking[]
     order_id: row.order_id,
     starts_at: row.starts_at,
     status: row.status,
+    remote_session_link: row.remote_session_link,
     setup_requirements: Array.isArray(row.setup_requirements)
       ? row.setup_requirements.map((r) => ({
           id: r.id,

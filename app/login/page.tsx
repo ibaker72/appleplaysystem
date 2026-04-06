@@ -80,6 +80,11 @@ export default async function LoginPage({
             className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 outline-none ring-electric focus:ring-1"
           />
         </label>
+        <div className="text-right">
+          <Link href="/forgot-password" className="text-sm text-white/50 hover:text-white/80">
+            Forgot password?
+          </Link>
+        </div>
         {params.error ? <p className="text-sm text-red-300">{params.error}</p> : null}
         <button
           type="submit"

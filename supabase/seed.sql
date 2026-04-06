@@ -1,22 +1,73 @@
-insert into customer_profiles (user_id, full_name, phone)
-values ('37499318-0c14-4150-8480-ccc36db7164c', 'Alex Fischer', '+1 555-331-9022');
+-- Clear existing seed data
+DELETE FROM feature_compatibility_rules;
+DELETE FROM features;
+DELETE FROM supported_vehicle_configs;
 
-insert into vehicles (customer_id, brand, model, year, chassis, head_unit, vin)
-values (
-  '37499318-0c14-4150-8480-ccc36db7164c',
-  'BMW',
-  '3 Series',
-  2021,
-  'G20',
-  'MGU',
-  'WBA00000000000000'
-);
+-- Supported vehicle configurations
+INSERT INTO supported_vehicle_configs (id, brand, model, chassis, head_unit, min_year, max_year) VALUES
+  ('c0000001-0000-0000-0000-000000000001', 'BMW', '3 Series', 'G20', 'MGU', 2019, 2025),
+  ('c0000001-0000-0000-0000-000000000002', 'BMW', '3 Series', 'G20', 'NBT Evo', 2019, 2022),
+  ('c0000001-0000-0000-0000-000000000003', 'BMW', '5 Series', 'G30', 'MGU', 2020, 2025),
+  ('c0000001-0000-0000-0000-000000000004', 'BMW', '5 Series', 'G30', 'NBT Evo', 2017, 2020),
+  ('c0000001-0000-0000-0000-000000000005', 'BMW', 'X3', 'G01', 'MGU', 2021, 2025),
+  ('c0000001-0000-0000-0000-000000000006', 'BMW', 'X3', 'G01', 'NBT Evo', 2018, 2021),
+  ('c0000001-0000-0000-0000-000000000007', 'BMW', 'X5', 'G05', 'MGU', 2019, 2025),
+  ('c0000001-0000-0000-0000-000000000008', 'BMW', '4 Series', 'G22', 'MGU', 2020, 2025),
+  ('c0000001-0000-0000-0000-000000000009', 'BMW', '1 Series', 'F20', 'NBT Evo', 2017, 2019),
+  ('c0000001-0000-0000-0000-000000000010', 'BMW', 'X1', 'F48', 'EntryNav2', 2016, 2022);
 
-insert into supported_vehicle_configs (brand, model, chassis, head_unit, min_year, max_year)
-values ('BMW', '3 Series', 'G20', 'MGU', 2019, 2025);
+-- Features catalog
+INSERT INTO features (id, brand, title, description, session_minutes, base_price_usd) VALUES
+  ('f0000001-0000-0000-0000-000000000001', 'BMW', 'Apple CarPlay Activation', 'Factory-style CarPlay activation for compatible iDrive systems.', 35, 179),
+  ('f0000001-0000-0000-0000-000000000002', 'BMW', 'Fullscreen Apple CarPlay', 'Enable native fullscreen layout for wider iDrive displays.', 20, 99),
+  ('f0000001-0000-0000-0000-000000000003', 'BMW', 'Video in Motion', 'Allow passenger media playback while stationary and in motion where permitted.', 25, 129),
+  ('f0000001-0000-0000-0000-000000000004', 'BMW', 'Startup Animation Coding', 'Apply premium startup visual profile to iDrive boot sequence.', 15, 79),
+  ('f0000001-0000-0000-0000-000000000005', 'BMW', 'iDrive Feature Coding', 'Tailored coding package for comfort, safety, and display preferences.', 45, 229),
+  ('f0000001-0000-0000-0000-000000000006', 'BMW', 'Enhanced Bluetooth Activation', 'Enable expanded Bluetooth audio and contact sync functions.', 20, 89),
+  ('f0000001-0000-0000-0000-000000000007', 'BMW', 'Digital Speed Display', 'Show live digital speed in the instrument cluster HUD area.', 12, 69),
+  ('f0000001-0000-0000-0000-000000000008', 'BMW', 'Seatbelt Chime Adjustment', 'Adjust warning logic for seatbelt reminders.', 10, 59),
+  ('f0000001-0000-0000-0000-000000000009', 'BMW', 'Welcome Light Customization', 'Configure exterior and interior welcome lighting sequence.', 18, 89);
 
-insert into features (brand, title, description, session_minutes, base_price_usd)
-values
-('BMW', 'Apple CarPlay Activation', 'Factory-style activation', 35, 179),
-('BMW', 'Fullscreen Apple CarPlay', 'Enable fullscreen layout', 20, 99),
-('BMW', 'Video in Motion', 'Passenger media coding', 25, 129);
+-- Feature compatibility rules (which features work with which configs)
+-- MGU configs get most features
+INSERT INTO feature_compatibility_rules (feature_id, config_id) VALUES
+  -- G20 MGU
+  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000001'),
+  ('f0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000001'),
+  ('f0000001-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000001'),
+  ('f0000001-0000-0000-0000-000000000004', 'c0000001-0000-0000-0000-000000000001'),
+  ('f0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000001'),
+  ('f0000001-0000-0000-0000-000000000007', 'c0000001-0000-0000-0000-000000000001'),
+  ('f0000001-0000-0000-0000-000000000008', 'c0000001-0000-0000-0000-000000000001'),
+  ('f0000001-0000-0000-0000-000000000009', 'c0000001-0000-0000-0000-000000000001'),
+  -- G20 NBT Evo
+  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000002'),
+  ('f0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000002'),
+  ('f0000001-0000-0000-0000-000000000008', 'c0000001-0000-0000-0000-000000000002'),
+  -- G30 MGU
+  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000003'),
+  ('f0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000003'),
+  ('f0000001-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000003'),
+  ('f0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000003'),
+  ('f0000001-0000-0000-0000-000000000009', 'c0000001-0000-0000-0000-000000000003'),
+  -- G30 NBT Evo
+  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000004'),
+  ('f0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000004'),
+  -- X3 G01 MGU
+  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000005'),
+  ('f0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000005'),
+  ('f0000001-0000-0000-0000-000000000004', 'c0000001-0000-0000-0000-000000000005'),
+  ('f0000001-0000-0000-0000-000000000007', 'c0000001-0000-0000-0000-000000000005'),
+  -- X5 G05 MGU
+  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000007'),
+  ('f0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000007'),
+  ('f0000001-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000007'),
+  ('f0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000007'),
+  ('f0000001-0000-0000-0000-000000000009', 'c0000001-0000-0000-0000-000000000007'),
+  -- G22 MGU (4 Series)
+  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000008'),
+  ('f0000001-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000008'),
+  ('f0000001-0000-0000-0000-000000000007', 'c0000001-0000-0000-0000-000000000008'),
+  -- F20 NBT Evo (1 Series)
+  ('f0000001-0000-0000-0000-000000000006', 'c0000001-0000-0000-0000-000000000009'),
+  ('f0000001-0000-0000-0000-000000000008', 'c0000001-0000-0000-0000-000000000009');

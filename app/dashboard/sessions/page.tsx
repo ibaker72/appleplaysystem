@@ -93,6 +93,17 @@ export default async function SessionsPage() {
               >
                 View timeline
               </Link>
+              {booking.remote_session_link &&
+                (booking.status === "scheduled" || booking.status === "in_progress") ? (
+                <a
+                  href={booking.remote_session_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-xl bg-silver px-3 py-1.5 text-xs font-medium text-black transition hover:bg-white"
+                >
+                  Join Remote Session ↗
+                </a>
+              ) : null}
             </div>
 
             {booking.status === "pending" ? (

@@ -45,7 +45,7 @@ export default async function BookingPage({ params }: { params: Promise<{ orderI
 
   const { data: booking } = await supabase
     .from("bookings")
-    .select("id, status, starts_at, technician_id")
+    .select("id, status, starts_at, technician_id, remote_session_link")
     .eq("order_id", orderId)
     .maybeSingle();
 
@@ -94,6 +94,18 @@ export default async function BookingPage({ params }: { params: Promise<{ orderI
           <div className="mt-4 rounded-xl bg-white/5 p-3 text-sm text-white/70">
             Scheduled: {new Date(booking.starts_at).toLocaleString()}
           </div>
+        ) : null}
+
+        {booking?.remote_session_link &&
+          (booking.status === "scheduled" || booking.status === "in_progress") ? (
+          <a
+            href={booking.remote_session_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-silver px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white"
+          >
+            Join Remote Session ↗
+          </a>
         ) : null}
       </div>
 
