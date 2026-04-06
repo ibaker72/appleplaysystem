@@ -1,31 +1,33 @@
 import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import type { OrderStatus, PaymentStatus } from "@/types/database";
+
+const validOrderStatuses: OrderStatus[] = ["draft", "pending", "confirmed", "completed", "cancelled"];
+const validPaymentStatuses: PaymentStatus[] = ["unpaid", "paid", "refunded", "failed"];
 
 export async function updateOrderStatus(orderId: string, status: string) {
-  const validStatuses = ["draft", "pending", "confirmed", "completed", "cancelled"];
-  if (!validStatuses.includes(status)) {
+  if (!validOrderStatuses.includes(status as OrderStatus)) {
     throw new Error("Invalid order status");
   }
 
   const supabase = createAdminSupabaseClient();
   const { error } = await supabase
     .from("orders")
-    .update({ status, updated_at: new Date().toISOString() })
+    .update({ status: status as OrderStatus, updated_at: new Date().toISOString() })
     .eq("id", orderId);
 
   if (error) throw new Error(`Failed to update order: ${error.message}`);
 }
 
 export async function updatePaymentStatus(orderId: string, paymentStatus: string) {
-  const validStatuses = ["unpaid", "paid", "refunded", "failed"];
-  if (!validStatuses.includes(paymentStatus)) {
+  if (!validPaymentStatuses.includes(paymentStatus as PaymentStatus)) {
     throw new Error("Invalid payment status");
   }
 
   const supabase = createAdminSupabaseClient();
   const { error } = await supabase
     .from("orders")
-    .update({ payment_status: paymentStatus, updated_at: new Date().toISOString() })
+    .update({ payment_status: paymentStatus as PaymentStatus, updated_at: new Date().toISOString() })
     .eq("id", orderId);
 
   if (error) throw new Error(`Failed to update payment status: ${error.message}`);

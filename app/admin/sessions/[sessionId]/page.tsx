@@ -64,8 +64,8 @@ export default async function AdminSessionDetailPage({
       .order("created_at", { ascending: false }),
   ]);
 
-  const customer = order?.customer_profiles as unknown as { full_name: string | null; phone: string | null } | null;
-  const vehicle = order?.vehicles as unknown as { brand: string; model: string; year: number; chassis: string; head_unit: string | null } | null;
+  const customer = (order as Record<string, unknown> | null)?.customer_profiles as { full_name: string | null; phone: string | null } | null;
+  const vehicle = (order as Record<string, unknown> | null)?.vehicles as { brand: string; model: string; year: number; chassis: string; head_unit: string | null } | null;
 
   async function handleUpdateStatus(formData: FormData) {
     "use server";
