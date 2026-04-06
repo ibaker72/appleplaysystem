@@ -27,8 +27,8 @@ export const customers: CustomerProfile[] = [{ id: "c1", fullName: "Alex Fischer
 export const vehicles: Vehicle[] = [{ id: "v1", customerId: "c1", brand: "BMW", model: "3 Series", year: 2021, chassis: "G20", headUnit: "MGU", vin: "WBA00000000000000" }];
 
 export const orders: Order[] = [
-  { id: "o1", customerId: "c1", vehicleId: "v1", status: "booked", totalUsd: 278, createdAt: "2026-03-31T14:30:00Z" },
-  { id: "o2", customerId: "c1", vehicleId: "v1", status: "complete", totalUsd: 129, createdAt: "2026-02-14T11:00:00Z" }
+  { id: "o1", customerId: "c1", vehicleId: "v1", status: "confirmed", totalUsd: 278, createdAt: "2026-03-31T14:30:00Z" },
+  { id: "o2", customerId: "c1", vehicleId: "v1", status: "completed", totalUsd: 129, createdAt: "2026-02-14T11:00:00Z" }
 ];
 
 export const bookings: Booking[] = [{ id: "b1", orderId: "o1", startsAt: "2026-04-07T19:00:00Z", technicianName: "Martin K.", status: "scheduled" }];

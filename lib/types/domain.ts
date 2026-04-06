@@ -1,6 +1,8 @@
+import type { OrderStatus, BookingStatus } from "@/types/database";
+
 export type VehicleBrand = "BMW" | "Audi" | "Mercedes-Benz";
 
-export type OrderStatus = "pending" | "paid" | "booked" | "in_progress" | "complete";
+export type { OrderStatus, BookingStatus };
 
 export interface CustomerProfile {
   id: string;
@@ -40,14 +42,6 @@ export interface FeatureCompatibilityRule {
   headUnits?: string[];
 }
 
-export interface CompatibilityResult {
-  status: "compatible" | "limited" | "not_supported";
-  recommendedFeatures: Feature[];
-  estimatedMinutes: number;
-  setupRequirements: string[];
-  estimatedPrice: number;
-}
-
 export interface Order {
   id: string;
   customerId: string;
@@ -62,5 +56,5 @@ export interface Booking {
   orderId: string;
   startsAt: string;
   technicianName: string;
-  status: "scheduled" | "live" | "finished";
+  status: BookingStatus;
 }

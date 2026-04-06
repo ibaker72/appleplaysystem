@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
+
+export const metadata: Metadata = {
+  title: "Supported BMW Vehicles | Remote Code DE",
+  description: "View supported BMW models, chassis codes, and head units for remote coding. G-Chassis with NBT Evo, EntryNav2, and MGU supported.",
+};
 
 export default function SupportedVehiclesPage() {
   return (

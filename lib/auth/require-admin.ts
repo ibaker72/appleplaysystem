@@ -1,3 +1,4 @@
+import "server-only";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth/get-user";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";

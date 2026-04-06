@@ -46,10 +46,7 @@ export default async function SessionsPage() {
       ) : null}
 
       {bookings.map((booking) => {
-        const setupReqs = (booking as Record<string, unknown>).setup_requirements as
-          | { id: string; completed: boolean }[]
-          | undefined;
-        const checklist = setupReqs ?? [];
+        const checklist = booking.setup_requirements;
         const completedCount = checklist.filter((r) => r.completed).length;
 
         return (

@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Create Account | Remote Code DE",
+  description: "Create your Remote Code DE account to get started with remote BMW feature unlocking.",
+};
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/auth/get-user";
 

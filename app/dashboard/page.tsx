@@ -31,10 +31,7 @@ export default async function DashboardPage() {
   }
 
   const nextBooking = bookings.find((b) => b.status === "pending" || b.status === "scheduled");
-  const setupReqs = (nextBooking as Record<string, unknown> | undefined)?.setup_requirements as
-    | { completed: boolean }[]
-    | undefined;
-  const checklist = setupReqs ?? [];
+  const checklist = nextBooking?.setup_requirements ?? [];
   const completed = checklist.filter((item) => item.completed).length;
 
   const hasPaidOrder = orders.some((o) => o.payment_status === "paid");

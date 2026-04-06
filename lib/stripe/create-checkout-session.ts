@@ -1,3 +1,4 @@
+import "server-only";
 import { getStripeClient } from "@/lib/stripe/client";
 import { getSiteUrl } from "@/lib/env";
 

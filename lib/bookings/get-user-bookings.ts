@@ -1,6 +1,19 @@
+import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
-export async function getUserBookings(customerId: string) {
+export interface UserBooking {
+  id: string;
+  order_id: string;
+  starts_at: string | null;
+  status: string;
+  setup_requirements: Array<{
+    id: string;
+    requirement: string;
+    completed: boolean;
+  }>;
+}
+
+export async function getUserBookings(customerId: string): Promise<UserBooking[]> {
   const supabase = createAdminSupabaseClient();
 
   const { data, error } = await supabase
@@ -20,5 +33,17 @@ export async function getUserBookings(customerId: string) {
     throw new Error(`Failed to load bookings: ${error.message}`);
   }
 
-  return data ?? [];
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    order_id: row.order_id,
+    starts_at: row.starts_at,
+    status: row.status,
+    setup_requirements: Array.isArray(row.setup_requirements)
+      ? row.setup_requirements.map((r) => ({
+          id: r.id,
+          requirement: r.requirement,
+          completed: r.completed,
+        }))
+      : [],
+  }));
 }

@@ -1,3 +1,4 @@
+import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getCompatibleFeatures } from "@/lib/compatibility/get-compatible-features";
 import type { CreateOrderInput } from "@/types/orders";

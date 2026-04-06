@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
+
+export const metadata: Metadata = {
+  title: "Contact | Remote Code DE Support",
+  description: "Get in touch with the Remote Code DE support team for questions about BMW remote coding sessions.",
+};
 
 export default function ContactPage() {
   return (

@@ -1,3 +1,4 @@
+import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 const DEFAULT_REQUIREMENTS = [

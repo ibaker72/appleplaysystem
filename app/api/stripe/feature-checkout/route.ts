@@ -4,6 +4,7 @@ import { getUser } from "@/lib/auth/get-user";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getStripeClient } from "@/lib/stripe/client";
 import { getSiteUrl } from "@/lib/env";
+import { rateLimit } from "@/lib/rate-limit";
 
 const featureCheckoutSchema = z.object({
   featureId: z.string().uuid("Invalid feature ID"),
@@ -14,6 +15,11 @@ export async function POST(request: NextRequest) {
     const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
+    const { success } = rateLimit({ key: `feature-checkout:${user.id}`, limit: 10, windowMs: 60_000 });
+    if (!success) {
+      return NextResponse.json({ error: "Too many requests. Please wait before trying again." }, { status: 429 });
     }
 
     const body = await request.json().catch(() => null);
@@ -40,6 +46,20 @@ export async function POST(request: NextRequest) {
 
     if (feature.base_price_usd <= 0) {
       return NextResponse.json({ error: "Invalid feature price" }, { status: 400 });
+    }
+
+    // Clean up any previous unpaid orders for this exact feature from this user
+    const { data: staleOrders } = await supabase
+      .from("order_items")
+      .select("order_id, orders!inner(id, customer_id, payment_status)")
+      .eq("feature_id", featureId)
+      .eq("orders.customer_id", user.id)
+      .eq("orders.payment_status", "unpaid");
+
+    if (staleOrders && staleOrders.length > 0) {
+      const staleOrderIds = staleOrders.map((item) => item.order_id);
+      await supabase.from("order_items").delete().in("order_id", staleOrderIds);
+      await supabase.from("orders").delete().in("id", staleOrderIds);
     }
 
     // Check if user has a vehicle (required for order)

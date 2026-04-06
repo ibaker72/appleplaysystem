@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getUser } from "@/lib/auth/get-user";
+import { MobileNav } from "@/components/layout/MobileNav";
 
-const links = [
+const links: [string, string][] = [
   ["How it works", "/how-it-works"],
   ["Supported Vehicles", "/supported-vehicles"],
   ["Features", "/features"],
@@ -26,9 +27,9 @@ export async function Navbar() {
             </Link>
           ))}
         </nav>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {user ? (
-            <Button href="/dashboard" variant="ghost">
+            <Button href="/dashboard" variant="ghost" className="hidden sm:inline-flex">
               Dashboard
             </Button>
           ) : (
@@ -36,7 +37,8 @@ export async function Navbar() {
               Login
             </Button>
           )}
-          <Button href="/check-compatibility">Check Compatibility</Button>
+          <Button href="/check-compatibility" className="hidden sm:inline-flex">Check Compatibility</Button>
+          <MobileNav links={links} user={!!user} />
         </div>
       </div>
     </header>

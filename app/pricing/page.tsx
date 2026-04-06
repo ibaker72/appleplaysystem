@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { PricingCard } from "@/components/marketing/PricingCard";
+
+export const metadata: Metadata = {
+  title: "Pricing | Remote BMW Feature Unlock Packages",
+  description: "Transparent pricing for remote BMW coding sessions. Single feature unlocks from $99, bundles, and premium packages available.",
+};
 
 export default function PricingPage() {
   return (

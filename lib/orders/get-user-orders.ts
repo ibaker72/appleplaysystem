@@ -1,3 +1,4 @@
+import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 export async function getUserOrders(customerId: string) {

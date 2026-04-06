@@ -1,3 +1,4 @@
+import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 interface SaveVehicleInput {

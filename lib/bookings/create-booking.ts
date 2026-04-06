@@ -1,3 +1,4 @@
+import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createDefaultSetupRequirements } from "@/lib/setup/create-default-setup-requirements";
 

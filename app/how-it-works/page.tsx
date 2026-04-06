@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
+
+export const metadata: Metadata = {
+  title: "How It Works | Remote BMW Coding Process",
+  description: "Learn how our remote BMW coding process works — from compatibility check to feature activation, all done remotely.",
+};
 
 export default function HowItWorksPage() {
   return (

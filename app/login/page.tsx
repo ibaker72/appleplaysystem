@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Sign In | Remote Code DE",
+  description: "Sign in to your Remote Code DE account to manage vehicles, orders, and remote coding sessions.",
+};
 import { getUser } from "@/lib/auth/get-user";
 
 const loginSchema = z.object({

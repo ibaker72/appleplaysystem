@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { HeroShell } from "@/components/marketing/HeroShell";
+
+export const metadata: Metadata = {
+  title: "Remote German Auto Feature Unlock | Premium BMW Coding Sessions",
+  description: "Unlock premium features on your BMW remotely. Professional remote coding sessions for CarPlay activation, iDrive customization, and more.",
+};
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { BrandPill } from "@/components/marketing/BrandPill";
 import { FeatureCard } from "@/components/marketing/FeatureCard";

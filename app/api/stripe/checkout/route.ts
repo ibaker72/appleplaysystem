@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getUser } from "@/lib/auth/get-user";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createCheckoutSession } from "@/lib/stripe/create-checkout-session";
+import { rateLimit } from "@/lib/rate-limit";
 
 const checkoutSchema = z.object({
   orderId: z.string().uuid("Invalid order ID"),
@@ -13,6 +14,11 @@ export async function POST(request: NextRequest) {
     const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
+    const { success } = rateLimit({ key: `checkout:${user.id}`, limit: 10, windowMs: 60_000 });
+    if (!success) {
+      return NextResponse.json({ error: "Too many requests. Please wait before trying again." }, { status: 429 });
     }
 
     const body = await request.json().catch(() => null);
