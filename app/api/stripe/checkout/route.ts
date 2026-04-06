@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getUser } from "@/lib/auth/get-user";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
-import { createCheckoutSession } from "@/lib/stripe/create-checkout-session";
+import { createCheckoutSession, type LineItem } from "@/lib/stripe/create-checkout-session";
 import { rateLimit } from "@/lib/rate-limit";
 
 const checkoutSchema = z.object({
@@ -46,10 +46,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "This order has already been paid" }, { status: 400 });
     }
 
+    // Query order items with joined features for itemized checkout
+    const { data: orderItems } = await supabase
+      .from("order_items")
+      .select("price_usd, features!inner(title, description, session_minutes)")
+      .eq("order_id", orderId);
+
+    let lineItems: LineItem[] | undefined;
+    if (orderItems && orderItems.length > 0) {
+      lineItems = orderItems.map((item) => {
+        const feature = Array.isArray(item.features) ? item.features[0] : item.features;
+        return {
+          name: feature.title as string,
+          description: `${feature.description as string} (~${feature.session_minutes as number} min session)`,
+          priceUsd: item.price_usd,
+        };
+      });
+    }
+
     const session = await createCheckoutSession({
       orderId: order.id,
       totalUsd: order.total_usd,
       customerId: order.customer_id,
+      lineItems,
     });
 
     // Store the checkout session ID on the order
