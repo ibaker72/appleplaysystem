@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { z } from "zod";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { requireUser } from "@/lib/auth/require-user";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -23,6 +25,7 @@ function getStepIndex(orderStatus: string, bookingStatus: string | null): number
 export default async function BookingPage({ params }: { params: Promise<{ orderId: string }> }) {
   const user = await requireUser();
   const { orderId } = await params;
+  if (!z.string().uuid().safeParse(orderId).success) notFound();
   const supabase = createAdminSupabaseClient();
 
   const { data: order } = await supabase

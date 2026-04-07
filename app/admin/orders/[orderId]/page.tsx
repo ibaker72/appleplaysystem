@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -29,6 +31,7 @@ export default async function AdminOrderDetailPage({
 }) {
   await requireAdmin();
   const { orderId } = await params;
+  if (!z.string().uuid().safeParse(orderId).success) notFound();
   const supabase = createAdminSupabaseClient();
 
   const { data: order } = await supabase

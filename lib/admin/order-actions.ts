@@ -1,33 +1,31 @@
 import "server-only";
+import { z } from "zod";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
-import type { OrderStatus, PaymentStatus } from "@/types/database";
 
-const validOrderStatuses: OrderStatus[] = ["draft", "pending", "confirmed", "completed", "cancelled"];
-const validPaymentStatuses: PaymentStatus[] = ["unpaid", "paid", "refunded", "failed"];
+const orderStatusSchema = z.enum(["draft", "pending", "confirmed", "completed", "cancelled"]);
+const paymentStatusSchema = z.enum(["unpaid", "paid", "refunded", "failed"]);
 
 export async function updateOrderStatus(orderId: string, status: string) {
-  if (!validOrderStatuses.includes(status as OrderStatus)) {
-    throw new Error("Invalid order status");
-  }
+  z.string().uuid().parse(orderId);
+  const validStatus = orderStatusSchema.parse(status);
 
   const supabase = createAdminSupabaseClient();
   const { error } = await supabase
     .from("orders")
-    .update({ status: status as OrderStatus, updated_at: new Date().toISOString() })
+    .update({ status: validStatus, updated_at: new Date().toISOString() })
     .eq("id", orderId);
 
   if (error) throw new Error(`Failed to update order: ${error.message}`);
 }
 
 export async function updatePaymentStatus(orderId: string, paymentStatus: string) {
-  if (!validPaymentStatuses.includes(paymentStatus as PaymentStatus)) {
-    throw new Error("Invalid payment status");
-  }
+  z.string().uuid().parse(orderId);
+  const validStatus = paymentStatusSchema.parse(paymentStatus);
 
   const supabase = createAdminSupabaseClient();
   const { error } = await supabase
     .from("orders")
-    .update({ payment_status: paymentStatus as PaymentStatus, updated_at: new Date().toISOString() })
+    .update({ payment_status: validStatus, updated_at: new Date().toISOString() })
     .eq("id", orderId);
 
   if (error) throw new Error(`Failed to update payment status: ${error.message}`);

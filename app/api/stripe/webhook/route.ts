@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Signature verification failed";
       console.error("[stripe/webhook] Signature verification failed:", msg);
-      return NextResponse.json({ error: msg }, { status: 400 });
+      return NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
     }
 
     if (event.type === "checkout.session.completed") {
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("[stripe/webhook] Processing error:", err instanceof Error ? err.message : err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Webhook processing failed" },
+      { error: "Webhook processing failed" },
       { status: 400 }
     );
   }

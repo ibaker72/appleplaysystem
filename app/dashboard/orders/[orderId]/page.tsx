@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { z } from "zod";
 import { CheckoutButton } from "@/components/dashboard/CheckoutButton";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { requireUser } from "@/lib/auth/require-user";
@@ -26,6 +28,7 @@ export default async function CustomerOrderDetailPage({
 }) {
   const user = await requireUser("/dashboard/orders");
   const { orderId } = await params;
+  if (!z.string().uuid().safeParse(orderId).success) notFound();
   const supabase = createAdminSupabaseClient();
 
   const { data: order } = await supabase

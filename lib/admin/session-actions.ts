@@ -1,7 +1,14 @@
 import "server-only";
+import { z } from "zod";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
+const uuidSchema = z.string().uuid();
+const bookingStatusSchema = z.enum(["pending", "scheduled", "in_progress", "completed", "cancelled"]);
+
 export async function assignTechnician(bookingId: string, technicianId: string | null) {
+  uuidSchema.parse(bookingId);
+  if (technicianId) uuidSchema.parse(technicianId);
+
   const supabase = createAdminSupabaseClient();
   const { error } = await supabase
     .from("bookings")
@@ -15,17 +22,17 @@ export async function assignTechnician(bookingId: string, technicianId: string |
 }
 
 export async function updateBookingStatus(bookingId: string, status: string) {
-  const validStatuses = ["pending", "scheduled", "in_progress", "completed", "cancelled"];
-  if (!validStatuses.includes(status)) throw new Error("Invalid booking status");
+  uuidSchema.parse(bookingId);
+  const validStatus = bookingStatusSchema.parse(status);
 
   const supabase = createAdminSupabaseClient();
   const updates: Record<string, unknown> = {
-    status,
+    status: validStatus,
     updated_at: new Date().toISOString(),
   };
 
   // When completing a session, also mark the parent order as completed
-  if (status === "completed") {
+  if (validStatus === "completed") {
     const { data: booking } = await supabase
       .from("bookings")
       .select("order_id")
@@ -49,6 +56,11 @@ export async function updateBookingStatus(bookingId: string, status: string) {
 }
 
 export async function setRemoteSessionLink(bookingId: string, link: string) {
+  uuidSchema.parse(bookingId);
+  if (link) {
+    z.string().url().parse(link);
+  }
+
   const supabase = createAdminSupabaseClient();
   const { error } = await supabase
     .from("bookings")
@@ -59,6 +71,10 @@ export async function setRemoteSessionLink(bookingId: string, link: string) {
 }
 
 export async function addTechnicianNote(bookingId: string, technicianId: string, note: string) {
+  uuidSchema.parse(bookingId);
+  uuidSchema.parse(technicianId);
+  z.string().trim().min(1).max(2000).parse(note);
+
   const supabase = createAdminSupabaseClient();
   const { error } = await supabase
     .from("technician_notes")

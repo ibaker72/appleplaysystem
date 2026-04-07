@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { requireTechnician } from "@/lib/auth/require-technician";
+
+export const metadata: Metadata = { title: "Technician Portal | Remote Code DE" };
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 const statusStyles: Record<string, string> = {

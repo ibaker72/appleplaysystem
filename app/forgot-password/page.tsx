@@ -1,19 +1,33 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/env";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const metadata: Metadata = {
   title: "Forgot Password | Remote Code DE",
 };
 
+const forgotPasswordSchema = z.object({
+  email: z.string().trim().email("Please enter a valid email address"),
+});
+
 async function forgotPasswordAction(formData: FormData) {
   "use server";
-  const email = String(formData.get("email")).trim();
-  if (!email) {
-    redirect("/forgot-password?error=Please+enter+your+email");
+  const parsed = forgotPasswordSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? "Invalid input";
+    redirect(`/forgot-password?error=${encodeURIComponent(msg)}`);
+  }
+
+  const { email } = parsed.data;
+
+  const { success } = await rateLimit({ key: `forgot-password:${email}`, limit: 3, windowMs: 15 * 60 * 1000 });
+  if (!success) {
+    redirect("/forgot-password?sent=1");
   }
 
   const supabase = await createServerSupabaseClient();

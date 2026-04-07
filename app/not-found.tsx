@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { Button } from "@/components/ui/button";
+
+export const metadata: Metadata = { title: "Page Not Found | Remote Code DE" };
 
 export default function NotFound() {
   return (
