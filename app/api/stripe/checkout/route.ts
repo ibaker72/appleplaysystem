@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const { success } = rateLimit({ key: `checkout:${user.id}`, limit: 10, windowMs: 60_000 });
+    const { success } = await rateLimit({ key: `checkout:${user.id}`, limit: 10, windowMs: 60_000 });
     if (!success) {
       return NextResponse.json({ error: "Too many requests. Please wait before trying again." }, { status: 429 });
     }

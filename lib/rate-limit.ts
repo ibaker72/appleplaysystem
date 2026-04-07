@@ -1,9 +1,13 @@
-// Simple in-memory rate limiter for API routes
-// For production, replace with Redis-based solution
+// Rate limiter with optional Upstash Redis backend
+// Falls back to in-memory implementation for local dev
 
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+// --- In-memory fallback ---
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
-export function rateLimit(options: {
+function inMemoryRateLimit(options: {
   key: string;
   limit: number;
   windowMs: number;
@@ -22,4 +26,50 @@ export function rateLimit(options: {
 
   record.count++;
   return { success: true, remaining: options.limit - record.count };
+}
+
+// --- Upstash Redis backend ---
+let redis: Redis | null = null;
+const rateLimiters = new Map<string, Ratelimit>();
+
+function getRedis(): Redis | null {
+  if (redis) return redis;
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+
+  redis = new Redis({ url, token });
+  return redis;
+}
+
+function getUpstashLimiter(limit: number, windowMs: number): Ratelimit {
+  const cacheKey = `${limit}:${windowMs}`;
+  let limiter = rateLimiters.get(cacheKey);
+  if (!limiter) {
+    const r = getRedis()!;
+    limiter = new Ratelimit({
+      redis: r,
+      limiter: Ratelimit.slidingWindow(limit, `${windowMs} ms`),
+      prefix: "rl",
+    });
+    rateLimiters.set(cacheKey, limiter);
+  }
+  return limiter;
+}
+
+// --- Public API ---
+export async function rateLimit(options: {
+  key: string;
+  limit: number;
+  windowMs: number;
+}): Promise<{ success: boolean; remaining: number }> {
+  const r = getRedis();
+  if (!r) {
+    return inMemoryRateLimit(options);
+  }
+
+  const limiter = getUpstashLimiter(options.limit, options.windowMs);
+  const result = await limiter.limit(options.key);
+  return { success: result.success, remaining: result.remaining };
 }

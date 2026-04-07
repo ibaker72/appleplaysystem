@@ -44,6 +44,13 @@ export function getCronSecret() {
   return getEnv("CRON_SECRET", { optional: true });
 }
 
+export function getUpstashEnv() {
+  return {
+    redisUrl: getEnv("UPSTASH_REDIS_REST_URL", { optional: true }),
+    redisToken: getEnv("UPSTASH_REDIS_REST_TOKEN", { optional: true }),
+  };
+}
+
 export function getSiteUrl() {
   return getEnv("NEXT_PUBLIC_SITE_URL", { optional: true }) ?? "http://localhost:3000";
 }
