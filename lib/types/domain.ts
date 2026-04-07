@@ -1,6 +1,6 @@
 import type { OrderStatus, BookingStatus } from "@/types/database";
 
-export type VehicleBrand = "BMW" | "Audi" | "Mercedes-Benz";
+export type VehicleBrand = "BMW" | "Audi" | "Mercedes-Benz" | "Volkswagen" | "Porsche";
 
 export type { OrderStatus, BookingStatus };
 

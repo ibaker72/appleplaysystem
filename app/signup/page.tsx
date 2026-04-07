@@ -7,7 +7,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Create Account | Remote Code DE",
-  description: "Create your Remote Code DE account to get started with remote BMW feature unlocking.",
+  description: "Create your Remote Code DE account to get started with remote German vehicle feature unlocking.",
 };
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/auth/get-user";

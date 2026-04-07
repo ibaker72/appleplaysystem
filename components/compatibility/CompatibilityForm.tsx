@@ -4,14 +4,22 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 // Hardcoded fallback defaults in case the API fetch fails
-const fallbackBrands = ["BMW"];
+const fallbackBrands = ["BMW", "Audi", "Mercedes-Benz", "Volkswagen", "Porsche"];
 const fallbackModels: Record<string, string[]> = {
   BMW: ["1 Series", "2 Series", "3 Series", "4 Series", "5 Series", "7 Series", "X1", "X3", "X5", "X7"],
+  Audi: ["A3", "A4", "A5", "A6", "Q3", "Q5", "Q7", "Q8", "e-tron"],
+  "Mercedes-Benz": ["A-Class", "C-Class", "E-Class", "S-Class", "GLC", "GLE", "GLS"],
+  Volkswagen: ["Golf", "Polo", "Passat", "Tiguan", "T-Roc"],
+  Porsche: ["911", "Cayenne", "Macan", "Taycan", "Panamera"],
 };
 const fallbackChassis: Record<string, string[]> = {
   BMW: ["F20", "F22", "F30", "F32", "F48", "F10", "G20", "G22", "G30", "G01", "G05", "G07", "G70"],
+  Audi: ["8V", "B9", "F5", "4K", "8U", "FY", "4M", "4N"],
+  "Mercedes-Benz": ["W177", "W206", "W214", "W223", "X254", "V167", "X167"],
+  Volkswagen: ["MK7", "MK8", "B8", "AD1", "A11", "AW"],
+  Porsche: ["992", "9YA", "95B", "Y1A", "971"],
 };
-const fallbackHeadUnits = ["MGU", "NBT Evo", "EntryNav2", "NBT", "CIC"];
+const fallbackHeadUnits = ["MGU", "NBT Evo", "EntryNav2", "NBT", "CIC", "MIB2", "MIB3", "MBUX", "NTG5", "NTG6", "PCM5", "PCM6"];
 
 interface CompatibilityOptions {
   brands: string[];
@@ -84,14 +92,16 @@ export function CompatibilityForm() {
               </option>
             ))}
             {!options.brands.includes("Audi") && (
-              <option value="Audi" disabled className="bg-panel">
-                Audi (coming soon)
-              </option>
+              <option value="Audi" className="bg-panel">Audi</option>
             )}
             {!options.brands.includes("Mercedes-Benz") && (
-              <option value="Mercedes-Benz" disabled className="bg-panel">
-                Mercedes-Benz (coming soon)
-              </option>
+              <option value="Mercedes-Benz" className="bg-panel">Mercedes-Benz</option>
+            )}
+            {!options.brands.includes("Volkswagen") && (
+              <option value="Volkswagen" className="bg-panel">Volkswagen</option>
+            )}
+            {!options.brands.includes("Porsche") && (
+              <option value="Porsche" className="bg-panel">Porsche</option>
             )}
           </select>
         </label>

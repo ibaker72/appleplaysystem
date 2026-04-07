@@ -1,21 +1,10 @@
--- Clear existing seed data
-DELETE FROM feature_compatibility_rules;
-DELETE FROM features;
-DELETE FROM supported_vehicle_configs;
+-- Migration: Add Volkswagen and Porsche vehicle configs, features, and compatibility rules
+-- Date: 2026-04-07
 
--- Supported vehicle configurations
+-- ============================================================
+-- Volkswagen supported vehicle configurations
+-- ============================================================
 INSERT INTO supported_vehicle_configs (id, brand, model, chassis, head_unit, min_year, max_year) VALUES
-  ('c0000001-0000-0000-0000-000000000001', 'BMW', '3 Series', 'G20', 'MGU', 2019, 2025),
-  ('c0000001-0000-0000-0000-000000000002', 'BMW', '3 Series', 'G20', 'NBT Evo', 2019, 2022),
-  ('c0000001-0000-0000-0000-000000000003', 'BMW', '5 Series', 'G30', 'MGU', 2020, 2025),
-  ('c0000001-0000-0000-0000-000000000004', 'BMW', '5 Series', 'G30', 'NBT Evo', 2017, 2020),
-  ('c0000001-0000-0000-0000-000000000005', 'BMW', 'X3', 'G01', 'MGU', 2021, 2025),
-  ('c0000001-0000-0000-0000-000000000006', 'BMW', 'X3', 'G01', 'NBT Evo', 2018, 2021),
-  ('c0000001-0000-0000-0000-000000000007', 'BMW', 'X5', 'G05', 'MGU', 2019, 2025),
-  ('c0000001-0000-0000-0000-000000000008', 'BMW', '4 Series', 'G22', 'MGU', 2020, 2025),
-  ('c0000001-0000-0000-0000-000000000009', 'BMW', '1 Series', 'F20', 'NBT Evo', 2017, 2019),
-  ('c0000001-0000-0000-0000-000000000010', 'BMW', 'X1', 'F48', 'EntryNav2', 2016, 2022),
-  -- Volkswagen
   ('c0000002-0000-0000-0000-000000000001', 'Volkswagen', 'Golf', 'MK8', 'MIB3', 2020, 2026),
   ('c0000002-0000-0000-0000-000000000002', 'Volkswagen', 'Golf', 'MK7', 'MIB2', 2017, 2020),
   ('c0000002-0000-0000-0000-000000000003', 'Volkswagen', 'Passat', 'B8', 'MIB3', 2020, 2026),
@@ -24,8 +13,12 @@ INSERT INTO supported_vehicle_configs (id, brand, model, chassis, head_unit, min
   ('c0000002-0000-0000-0000-000000000006', 'Volkswagen', 'Tiguan', 'AD1', 'MIB2', 2018, 2021),
   ('c0000002-0000-0000-0000-000000000007', 'Volkswagen', 'T-Roc', 'A11', 'MIB3', 2022, 2026),
   ('c0000002-0000-0000-0000-000000000008', 'Volkswagen', 'Polo', 'AW', 'MIB3', 2021, 2026),
-  ('c0000002-0000-0000-0000-000000000009', 'Volkswagen', 'Polo', 'AW', 'MIB2', 2018, 2021),
-  -- Porsche
+  ('c0000002-0000-0000-0000-000000000009', 'Volkswagen', 'Polo', 'AW', 'MIB2', 2018, 2021);
+
+-- ============================================================
+-- Porsche supported vehicle configurations
+-- ============================================================
+INSERT INTO supported_vehicle_configs (id, brand, model, chassis, head_unit, min_year, max_year) VALUES
   ('c0000003-0000-0000-0000-000000000001', 'Porsche', '911', '992', 'PCM6', 2022, 2026),
   ('c0000003-0000-0000-0000-000000000002', 'Porsche', '911', '992', 'PCM5', 2019, 2022),
   ('c0000003-0000-0000-0000-000000000003', 'Porsche', 'Cayenne', '9YA', 'PCM6', 2022, 2026),
@@ -36,74 +29,31 @@ INSERT INTO supported_vehicle_configs (id, brand, model, chassis, head_unit, min
   ('c0000003-0000-0000-0000-000000000008', 'Porsche', 'Panamera', '971', 'PCM6', 2022, 2026),
   ('c0000003-0000-0000-0000-000000000009', 'Porsche', 'Panamera', '971', 'PCM5', 2017, 2022);
 
--- Features catalog
+-- ============================================================
+-- Volkswagen features
+-- ============================================================
 INSERT INTO features (id, brand, title, description, session_minutes, base_price_usd) VALUES
-  ('f0000001-0000-0000-0000-000000000001', 'BMW', 'Apple CarPlay Activation', 'Factory-style CarPlay activation for compatible iDrive systems.', 35, 179),
-  ('f0000001-0000-0000-0000-000000000002', 'BMW', 'Fullscreen Apple CarPlay', 'Enable native fullscreen layout for wider iDrive displays.', 20, 99),
-  ('f0000001-0000-0000-0000-000000000003', 'BMW', 'Video in Motion', 'Allow passenger media playback while stationary and in motion where permitted.', 25, 129),
-  ('f0000001-0000-0000-0000-000000000004', 'BMW', 'Startup Animation Coding', 'Apply premium startup visual profile to iDrive boot sequence.', 15, 79),
-  ('f0000001-0000-0000-0000-000000000005', 'BMW', 'iDrive Feature Coding', 'Tailored coding package for comfort, safety, and display preferences.', 45, 229),
-  ('f0000001-0000-0000-0000-000000000006', 'BMW', 'Enhanced Bluetooth Activation', 'Enable expanded Bluetooth audio and contact sync functions.', 20, 89),
-  ('f0000001-0000-0000-0000-000000000007', 'BMW', 'Digital Speed Display', 'Show live digital speed in the instrument cluster HUD area.', 12, 69),
-  ('f0000001-0000-0000-0000-000000000008', 'BMW', 'Seatbelt Chime Adjustment', 'Adjust warning logic for seatbelt reminders.', 10, 59),
-  ('f0000001-0000-0000-0000-000000000009', 'BMW', 'Welcome Light Customization', 'Configure exterior and interior welcome lighting sequence.', 18, 89),
-  -- Volkswagen features
   ('f0000002-0000-0000-0000-000000000001', 'Volkswagen', 'App-Connect Activation', 'Enable wireless Apple CarPlay and Android Auto on MIB-equipped vehicles.', 30, 159),
   ('f0000002-0000-0000-0000-000000000002', 'Volkswagen', 'Video in Motion', 'Allow media playback on the infotainment screen while the vehicle is in motion.', 20, 99),
   ('f0000002-0000-0000-0000-000000000003', 'Volkswagen', 'Start/Stop Memory', 'Remember your preferred Start/Stop system setting between drive cycles.', 15, 69),
   ('f0000002-0000-0000-0000-000000000004', 'Volkswagen', 'Needle Sweep Activation', 'Enable instrument cluster needle sweep animation on ignition.', 10, 49),
-  ('f0000002-0000-0000-0000-000000000005', 'Volkswagen', 'Mirror Dip on Reverse', 'Automatically dip passenger mirror when reverse gear is engaged.', 12, 59),
-  -- Porsche features
+  ('f0000002-0000-0000-0000-000000000005', 'Volkswagen', 'Mirror Dip on Reverse', 'Automatically dip passenger mirror when reverse gear is engaged.', 12, 59);
+
+-- ============================================================
+-- Porsche features
+-- ============================================================
+INSERT INTO features (id, brand, title, description, session_minutes, base_price_usd) VALUES
   ('f0000003-0000-0000-0000-000000000001', 'Porsche', 'Apple CarPlay Activation', 'Enable factory Apple CarPlay on PCM-equipped Porsche models.', 30, 199),
   ('f0000003-0000-0000-0000-000000000002', 'Porsche', 'Sport Chrono Display Coding', 'Customize the Sport Chrono display options and lap timer settings.', 25, 149),
   ('f0000003-0000-0000-0000-000000000003', 'Porsche', 'Video in Motion', 'Allow passenger media playback while stationary and in motion.', 20, 129),
   ('f0000003-0000-0000-0000-000000000004', 'Porsche', 'Exhaust Sound Configuration', 'Adjust the active exhaust valve and sound profile coding.', 30, 179),
   ('f0000003-0000-0000-0000-000000000005', 'Porsche', 'Welcome Light Customization', 'Configure exterior and interior welcome lighting sequence and duration.', 15, 89);
 
--- Feature compatibility rules (which features work with which configs)
--- MGU configs get most features
+-- ============================================================
+-- Volkswagen feature compatibility rules
+-- ============================================================
 INSERT INTO feature_compatibility_rules (feature_id, config_id) VALUES
-  -- G20 MGU
-  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000001'),
-  ('f0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000001'),
-  ('f0000001-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000001'),
-  ('f0000001-0000-0000-0000-000000000004', 'c0000001-0000-0000-0000-000000000001'),
-  ('f0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000001'),
-  ('f0000001-0000-0000-0000-000000000007', 'c0000001-0000-0000-0000-000000000001'),
-  ('f0000001-0000-0000-0000-000000000008', 'c0000001-0000-0000-0000-000000000001'),
-  ('f0000001-0000-0000-0000-000000000009', 'c0000001-0000-0000-0000-000000000001'),
-  -- G20 NBT Evo
-  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000002'),
-  ('f0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000002'),
-  ('f0000001-0000-0000-0000-000000000008', 'c0000001-0000-0000-0000-000000000002'),
-  -- G30 MGU
-  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000003'),
-  ('f0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000003'),
-  ('f0000001-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000003'),
-  ('f0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000003'),
-  ('f0000001-0000-0000-0000-000000000009', 'c0000001-0000-0000-0000-000000000003'),
-  -- G30 NBT Evo
-  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000004'),
-  ('f0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000004'),
-  -- X3 G01 MGU
-  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000005'),
-  ('f0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000005'),
-  ('f0000001-0000-0000-0000-000000000004', 'c0000001-0000-0000-0000-000000000005'),
-  ('f0000001-0000-0000-0000-000000000007', 'c0000001-0000-0000-0000-000000000005'),
-  -- X5 G05 MGU
-  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000007'),
-  ('f0000001-0000-0000-0000-000000000002', 'c0000001-0000-0000-0000-000000000007'),
-  ('f0000001-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000007'),
-  ('f0000001-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000007'),
-  ('f0000001-0000-0000-0000-000000000009', 'c0000001-0000-0000-0000-000000000007'),
-  -- G22 MGU (4 Series)
-  ('f0000001-0000-0000-0000-000000000001', 'c0000001-0000-0000-0000-000000000008'),
-  ('f0000001-0000-0000-0000-000000000003', 'c0000001-0000-0000-0000-000000000008'),
-  ('f0000001-0000-0000-0000-000000000007', 'c0000001-0000-0000-0000-000000000008'),
-  -- F20 NBT Evo (1 Series)
-  ('f0000001-0000-0000-0000-000000000006', 'c0000001-0000-0000-0000-000000000009'),
-  ('f0000001-0000-0000-0000-000000000008', 'c0000001-0000-0000-0000-000000000009'),
-  -- Volkswagen: Golf MK8 MIB3
+  -- Golf MK8 MIB3
   ('f0000002-0000-0000-0000-000000000001', 'c0000002-0000-0000-0000-000000000001'),
   ('f0000002-0000-0000-0000-000000000002', 'c0000002-0000-0000-0000-000000000001'),
   ('f0000002-0000-0000-0000-000000000003', 'c0000002-0000-0000-0000-000000000001'),
@@ -138,8 +88,13 @@ INSERT INTO feature_compatibility_rules (feature_id, config_id) VALUES
   ('f0000002-0000-0000-0000-000000000003', 'c0000002-0000-0000-0000-000000000008'),
   -- Polo AW MIB2
   ('f0000002-0000-0000-0000-000000000001', 'c0000002-0000-0000-0000-000000000009'),
-  ('f0000002-0000-0000-0000-000000000003', 'c0000002-0000-0000-0000-000000000009'),
-  -- Porsche: 911 992 PCM6
+  ('f0000002-0000-0000-0000-000000000003', 'c0000002-0000-0000-0000-000000000009');
+
+-- ============================================================
+-- Porsche feature compatibility rules
+-- ============================================================
+INSERT INTO feature_compatibility_rules (feature_id, config_id) VALUES
+  -- 911 992 PCM6
   ('f0000003-0000-0000-0000-000000000001', 'c0000003-0000-0000-0000-000000000001'),
   ('f0000003-0000-0000-0000-000000000002', 'c0000003-0000-0000-0000-000000000001'),
   ('f0000003-0000-0000-0000-000000000003', 'c0000003-0000-0000-0000-000000000001'),

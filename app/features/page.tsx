@@ -4,8 +4,8 @@ import { FeatureCard } from "@/components/marketing/FeatureCard";
 import { getFeatures } from "@/lib/features/get-features";
 
 export const metadata: Metadata = {
-  title: "Feature Catalog | BMW Remote Coding Options",
-  description: "Browse available BMW remote coding features including CarPlay activation, video in motion, iDrive customization, and more.",
+  title: "Feature Catalog | Remote Coding Options",
+  description: "Browse available remote coding features including CarPlay activation, video in motion, infotainment customization, and more for German vehicles.",
 };
 
 export default async function FeaturesPage() {

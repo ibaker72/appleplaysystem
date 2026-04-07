@@ -3,8 +3,8 @@ import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { CompatibilityForm } from "@/components/compatibility/CompatibilityForm";
 
 export const metadata: Metadata = {
-  title: "Check Compatibility | BMW Feature Unlock",
-  description: "Enter your BMW details to check which remote coding features are available for your vehicle.",
+  title: "Check Compatibility | Vehicle Feature Unlock",
+  description: "Enter your vehicle details to check which remote coding features are available for your BMW, Audi, Mercedes-Benz, Volkswagen, or Porsche.",
 };
 
 export default function CompatibilityPage() {
