@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { HeroShell } from "@/components/marketing/HeroShell";
 
 export const metadata: Metadata = {
-  title: "Remote German Auto Feature Unlock | Premium BMW Coding Sessions",
-  description: "Unlock premium features on your BMW remotely. Professional remote coding sessions for CarPlay activation, iDrive customization, and more.",
+  title: "Remote German Auto Feature Unlock | Premium Vehicle Coding Sessions",
+  description: "Unlock premium features on your BMW, Audi, Mercedes-Benz, Volkswagen, or Porsche remotely. Professional remote coding sessions for CarPlay activation, infotainment customization, and more.",
 };
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 import { BrandPill } from "@/components/marketing/BrandPill";
@@ -19,10 +19,12 @@ export default async function HomePage() {
     <>
       <HeroShell />
       <PremiumSection eyebrow="Coverage" title="Supported brands">
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           <BrandPill name="BMW" status="Live now" />
-          <BrandPill name="Audi" status="Coming soon" />
-          <BrandPill name="Mercedes-Benz" status="Coming soon" />
+          <BrandPill name="Audi" status="Live now" />
+          <BrandPill name="Mercedes-Benz" status="Live now" />
+          <BrandPill name="Volkswagen" status="Live now" />
+          <BrandPill name="Porsche" status="Live now" />
         </div>
       </PremiumSection>
       <PremiumSection eyebrow="Process" title="How it works">

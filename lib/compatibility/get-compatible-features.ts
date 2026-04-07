@@ -3,18 +3,6 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { CompatibilityInput, CompatibilityResult } from "@/types/compatibility";
 
 export async function getCompatibleFeatures(input: CompatibilityInput): Promise<CompatibilityResult> {
-  // Early guard: only BMW is currently supported
-  if (input.brand !== "BMW") {
-    return {
-      supported: false,
-      status: "not_supported",
-      reason: `${input.brand} support is coming soon. Currently only BMW is available.`,
-      compatibleFeatures: [],
-      estimatedSessionMinutes: 0,
-      estimatedTotalUsd: 0,
-    };
-  }
-
   const supabase = await createServerSupabaseClient();
 
   // Build the config query. head_unit may be null in the DB for configs that

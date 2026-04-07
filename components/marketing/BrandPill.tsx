@@ -2,6 +2,8 @@ const brandAccents: Record<string, { border: string; color: string }> = {
   BMW: { border: "border-l-blue-500", color: "#1a73e8" },
   Audi: { border: "border-l-red-500", color: "#c41e3a" },
   "Mercedes-Benz": { border: "border-l-gray-400", color: "#a0a0a0" },
+  Volkswagen: { border: "border-l-blue-600", color: "#1a3d7c" },
+  Porsche: { border: "border-l-red-600", color: "#b12b28" },
 };
 
 function BrandMonogram({ name }: { name: string }) {
@@ -30,6 +32,22 @@ function BrandMonogram({ name }: { name: string }) {
         <line x1="14" y1="2" x2="14" y2="14" stroke="currentColor" strokeWidth="1.2" className="text-gray-400/60" />
         <line x1="14" y1="14" x2="3.6" y2="22" stroke="currentColor" strokeWidth="1.2" className="text-gray-400/60" />
         <line x1="14" y1="14" x2="24.4" y2="22" stroke="currentColor" strokeWidth="1.2" className="text-gray-400/60" />
+      </svg>
+    );
+  }
+  if (name === "Volkswagen") {
+    return (
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="shrink-0">
+        <circle cx="14" cy="14" r="13" stroke="currentColor" strokeWidth="1.5" className="text-blue-400/60" />
+        <text x="14" y="15" textAnchor="middle" dominantBaseline="central" fill="currentColor" className="text-blue-300" fontSize="9" fontWeight="600">VW</text>
+      </svg>
+    );
+  }
+  if (name === "Porsche") {
+    return (
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="shrink-0">
+        <rect x="2" y="4" width="24" height="20" rx="3" stroke="currentColor" strokeWidth="1.2" className="text-red-400/60" />
+        <text x="14" y="15" textAnchor="middle" dominantBaseline="central" fill="currentColor" className="text-red-300" fontSize="7" fontWeight="600">P</text>
       </svg>
     );
   }

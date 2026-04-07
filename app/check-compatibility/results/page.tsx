@@ -71,7 +71,7 @@ export default async function CompatibilityResultsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const brand = String(params.brand ?? "BMW");
+  const brand = String(params.brand ?? "");
   const model = String(params.model ?? "");
   const year = Number(params.year ?? 0);
   const chassis = String(params.chassis ?? "");
@@ -80,11 +80,11 @@ export default async function CompatibilityResultsPage({
   const errorMsg = params.error ? String(params.error) : null;
 
   // Validate minimum required inputs
-  if (!model || !year || !chassis) {
+  if (!brand || !model || !year || !chassis) {
     return (
       <PremiumSection eyebrow="Results" title="Missing vehicle details">
         <div className="surface rounded-premium p-6 text-sm text-white/70">
-          <p>Please provide your vehicle model, year, and chassis code.</p>
+          <p>Please provide your vehicle brand, model, year, and chassis code.</p>
           <Link href="/check-compatibility" className="mt-4 inline-block text-white/80 underline">
             Back to compatibility checker
           </Link>

@@ -7,7 +7,7 @@ function layout(body: string): string {
     <div style="margin-bottom:32px;font-size:14px;letter-spacing:0.05em;color:rgba(255,255,255,0.5);">REMOTE CODE // DE</div>
     ${body}
     <div style="margin-top:40px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;color:rgba(255,255,255,0.35);">
-      Remote Code // DE &mdash; Premium BMW Feature Unlocking
+      Remote Code // DE &mdash; Premium German Vehicle Feature Unlocking
     </div>
   </div>
 </body>

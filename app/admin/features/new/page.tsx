@@ -40,6 +40,8 @@ export default async function AdminNewFeaturePage() {
               <option value="BMW" className="bg-panel">BMW</option>
               <option value="Audi" className="bg-panel">Audi</option>
               <option value="Mercedes-Benz" className="bg-panel">Mercedes-Benz</option>
+              <option value="Volkswagen" className="bg-panel">Volkswagen</option>
+              <option value="Porsche" className="bg-panel">Porsche</option>
             </select>
           </label>
 
