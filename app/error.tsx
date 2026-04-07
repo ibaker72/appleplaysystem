@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import { PremiumSection } from "@/components/marketing/PremiumSection";
 
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     console.error(error);
+    if (Sentry.isInitialized()) {
+      Sentry.captureException(error);
+    }
   }, [error]);
 
   return (
