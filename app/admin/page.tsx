@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+
+export const metadata: Metadata = { title: "Admin Console | Remote Code DE" };
 
 const sections = [
   { label: "Orders", href: "/admin/orders", description: "View and manage all customer orders." },

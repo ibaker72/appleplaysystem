@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+
+export const metadata: Metadata = { title: "Dashboard | Remote Code DE" };
 import { EmptyState } from "@/components/ui/EmptyState";
 import { requireUser } from "@/lib/auth/require-user";
 import { getUserVehicles } from "@/lib/vehicles/save-vehicle";

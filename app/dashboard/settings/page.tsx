@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { requireUser } from "@/lib/auth/require-user";
+
+export const metadata: Metadata = { title: "Settings | Remote Code DE" };
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 async function updateProfileAction(formData: FormData) {

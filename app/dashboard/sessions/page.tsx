@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+
+export const metadata: Metadata = { title: "Sessions | Remote Code DE" };
 import { EmptyState } from "@/components/ui/EmptyState";
 import { requireUser } from "@/lib/auth/require-user";
 import { getUserBookings } from "@/lib/bookings/get-user-bookings";

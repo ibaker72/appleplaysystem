@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckoutButton } from "@/components/dashboard/CheckoutButton";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+
+export const metadata: Metadata = { title: "Orders | Remote Code DE" };
 import { EmptyState } from "@/components/ui/EmptyState";
 import { requireUser } from "@/lib/auth/require-user";
 import { getUserOrders } from "@/lib/orders/get-user-orders";
