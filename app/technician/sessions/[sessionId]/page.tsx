@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -29,6 +30,7 @@ export default async function TechnicianSessionPage({
 }) {
   const user = await requireTechnician();
   const { sessionId } = await params;
+  if (!z.string().uuid().safeParse(sessionId).success) notFound();
   const supabase = createAdminSupabaseClient();
 
   const { data: booking } = await supabase

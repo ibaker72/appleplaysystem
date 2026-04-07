@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -25,6 +27,7 @@ export default async function AdminSessionDetailPage({
 }) {
   await requireAdmin();
   const { sessionId } = await params;
+  if (!z.string().uuid().safeParse(sessionId).success) notFound();
   const supabase = createAdminSupabaseClient();
 
   const { data: booking } = await supabase
