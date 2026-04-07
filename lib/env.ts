@@ -33,6 +33,17 @@ export function getStripeEnv() {
   };
 }
 
+export function getResendEnv() {
+  return {
+    apiKey: getEnv("RESEND_API_KEY", { optional: true }),
+    fromEmail: getEnv("RESEND_FROM_EMAIL", { optional: true }),
+  };
+}
+
+export function getCronSecret() {
+  return getEnv("CRON_SECRET", { optional: true });
+}
+
 export function getSiteUrl() {
   return getEnv("NEXT_PUBLIC_SITE_URL", { optional: true }) ?? "http://localhost:3000";
 }

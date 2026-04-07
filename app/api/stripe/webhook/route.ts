@@ -5,6 +5,8 @@ import { getStripeClient } from "@/lib/stripe/client";
 import { getStripeEnv } from "@/lib/env";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createBookingForOrder } from "@/lib/bookings/create-booking";
+import { sendEmail } from "@/lib/email/send";
+import { orderConfirmationEmail } from "@/lib/email/templates";
 
 export async function POST(request: Request) {
   try {
@@ -54,6 +56,40 @@ export async function POST(request: Request) {
 
           // createBookingForOrder is already idempotent (checks for existing booking)
           await createBookingForOrder(orderId);
+
+          // Send order confirmation email (fire-and-forget)
+          try {
+            const { data: authUser } = await supabase.auth.admin.getUserById(
+              (await supabase.from("orders").select("customer_id").eq("id", orderId).single()).data
+                ?.customer_id ?? ""
+            );
+            const { data: orderItems } = await supabase
+              .from("order_items")
+              .select("features:feature_id(name)")
+              .eq("order_id", orderId);
+            const { data: orderData } = await supabase
+              .from("orders")
+              .select("total_usd, customer_profiles:customer_id(full_name)")
+              .eq("id", orderId)
+              .single();
+
+            if (authUser?.user?.email && orderData) {
+              const profile = (orderData as Record<string, unknown>).customer_profiles as { full_name: string | null } | null;
+              const featureNames = (orderItems ?? []).map((item) => {
+                const feature = item.features as { name: string } | null;
+                return feature?.name ?? "Unknown";
+              });
+              const email = orderConfirmationEmail({
+                orderId,
+                totalUsd: orderData.total_usd ?? 0,
+                featureNames,
+                customerName: profile?.full_name ?? "Customer",
+              });
+              sendEmail({ to: authUser.user.email, ...email });
+            }
+          } catch (emailErr) {
+            console.error("[stripe/webhook] Email send error:", emailErr);
+          }
         }
       }
     }
