@@ -64,7 +64,7 @@ async function signupAction(formData: FormData) {
   }
 
   // Email confirmation may be required — no session returned
-  redirect(`/login?error=${encodeURIComponent("Please check your email to confirm your account, then sign in.")}`);
+  redirect("/login?confirm=pending");
 }
 
 export default async function SignupPage({

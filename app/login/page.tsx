@@ -85,7 +85,25 @@ export default async function LoginPage({
             Forgot password?
           </Link>
         </div>
-        {params.error ? <p className="text-sm text-red-300">{params.error}</p> : null}
+        {params.confirm === "pending" ? (
+          <div className="rounded-xl border border-electric/20 bg-electric/5 p-4 text-sm text-electric">
+            We&apos;ve sent a confirmation email. Please check your inbox and click the link to activate your account.
+          </div>
+        ) : null}
+        {params.error &&
+        (params.error.includes("Email not confirmed") || params.error.includes("email_not_confirmed")) ? (
+          <div className="space-y-2 rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">
+            <p>Please check your email and click the confirmation link, then try signing in again.</p>
+            <Link
+              href="/login?resend=true"
+              className="inline-block text-xs text-white/50 underline hover:text-white/80"
+            >
+              Resend confirmation
+            </Link>
+          </div>
+        ) : params.error ? (
+          <p className="text-sm text-red-300">{params.error}</p>
+        ) : null}
         <button
           type="submit"
           className="inline-flex w-full items-center justify-center rounded-xl bg-silver px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white"
