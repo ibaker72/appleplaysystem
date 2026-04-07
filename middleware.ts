@@ -2,12 +2,13 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const protectedPrefixes = ["/dashboard", "/booking", "/setup-instructions"];
+const protectedPrefixes = ["/dashboard", "/booking", "/setup-instructions", "/technician"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
   const isAdmin = pathname.startsWith("/admin");
+  const isTechnician = pathname.startsWith("/technician");
 
   // Create a response that @supabase/ssr can write refreshed cookies to
   let supabaseResponse = NextResponse.next({ request });
@@ -36,7 +37,7 @@ export async function middleware(request: NextRequest) {
   // Refresh the session — this call handles token refresh automatically
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!isProtected && !isAdmin) {
+  if (!isProtected && !isAdmin && !isTechnician) {
     return supabaseResponse;
   }
 
@@ -54,9 +55,19 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Technician routes: guard via env-var allow-list (admins also have access)
+  if (isTechnician) {
+    const techIds = (process.env.TECHNICIAN_USER_IDS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+    const adminIds = (process.env.ADMIN_USER_IDS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+    const allowed = techIds.includes(user.id) || adminIds.includes(user.id);
+    if (!allowed) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/booking/:path*", "/setup-instructions/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/booking/:path*", "/setup-instructions/:path*", "/technician/:path*"],
 };
