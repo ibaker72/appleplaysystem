@@ -37,13 +37,17 @@ export async function createBookingForOrder(orderId: string) {
   try {
     const { data: order } = await supabase
       .from("orders")
-      .select("id, customer_id, customer_profiles:customer_id(full_name)")
+      .select("id, customer_id")
       .eq("id", orderId)
       .single();
 
     if (order) {
       const { data: authUser } = await supabase.auth.admin.getUserById(order.customer_id);
-      const profile = (order as Record<string, unknown>).customer_profiles as { full_name: string | null } | null;
+      const { data: profile } = await supabase
+        .from("customer_profiles")
+        .select("full_name")
+        .eq("user_id", order.customer_id)
+        .maybeSingle();
 
       if (authUser?.user?.email) {
         const email = bookingConfirmationEmail({

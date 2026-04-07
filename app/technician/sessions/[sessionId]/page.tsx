@@ -61,7 +61,7 @@ export default async function TechnicianSessionPage({
         .single(),
       supabase
         .from("order_items")
-        .select("id, quantity, unit_price_usd, features:feature_id(name, description)")
+        .select("id, price_usd, features:feature_id(title, description)")
         .eq("order_id", booking.order_id),
       supabase
         .from("setup_requirements")
@@ -178,10 +178,10 @@ export default async function TechnicianSessionPage({
           <h3 className="mb-3 text-sm font-medium text-white/70">Ordered Features</h3>
           <div className="space-y-2">
             {(orderItems ?? []).map((item) => {
-              const feature = item.features as { name: string; description: string | null } | null;
+              const feature = item.features as unknown as { title: string; description: string | null } | null;
               return (
                 <div key={item.id} className="rounded-xl bg-white/5 p-3">
-                  <p className="text-sm font-medium">{feature?.name ?? "Unknown"}</p>
+                  <p className="text-sm font-medium">{feature?.title ?? "Unknown"}</p>
                   {feature?.description ? (
                     <p className="mt-1 text-xs text-white/50">{feature.description}</p>
                   ) : null}

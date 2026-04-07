@@ -35,12 +35,12 @@ async function getAnalytics() {
   // Top 5 features by order count
   const { data: featurePopularity } = await supabase
     .from("order_items")
-    .select("feature_id, features:feature_id(name)");
+    .select("feature_id, features:feature_id(title)");
 
   const featureCounts = new Map<string, { name: string; count: number }>();
   for (const item of featurePopularity ?? []) {
-    const feature = item.features as { name: string } | null;
-    const name = feature?.name ?? "Unknown";
+    const feature = item.features as unknown as { title: string } | null;
+    const name = feature?.title ?? "Unknown";
     const existing = featureCounts.get(item.feature_id) ?? { name, count: 0 };
     existing.count++;
     featureCounts.set(item.feature_id, existing);
@@ -52,14 +52,21 @@ async function getAnalytics() {
   // Recent orders (last 10)
   const { data: recentOrders } = await supabase
     .from("orders")
-    .select("id, status, payment_status, total_usd, created_at, customer_profiles:customer_id(full_name)")
+    .select("id, status, payment_status, total_usd, created_at, customer_profiles!inner(full_name)")
     .order("created_at", { ascending: false })
     .limit(10);
 
   return {
     revenueByMonth: Array.from(revenueByMonth.entries()).map(([month, revenue]) => ({ month, revenue })),
     topFeatures,
-    recentOrders: recentOrders ?? [],
+    recentOrders: (recentOrders ?? []) as Array<{
+      id: string;
+      status: string;
+      payment_status: string;
+      total_usd: number;
+      created_at: string;
+      customer_profiles: { full_name: string | null };
+    }>,
   };
 }
 

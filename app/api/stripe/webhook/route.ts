@@ -65,25 +65,29 @@ export async function POST(request: Request) {
             );
             const { data: orderItems } = await supabase
               .from("order_items")
-              .select("features:feature_id(name)")
+              .select("features:feature_id(title)")
               .eq("order_id", orderId);
             const { data: orderData } = await supabase
               .from("orders")
-              .select("total_usd, customer_profiles:customer_id(full_name)")
+              .select("total_usd")
               .eq("id", orderId)
               .single();
+            const { data: profileData } = await supabase
+              .from("customer_profiles")
+              .select("full_name")
+              .eq("user_id", authUser?.user?.id ?? "")
+              .maybeSingle();
 
             if (authUser?.user?.email && orderData) {
-              const profile = (orderData as Record<string, unknown>).customer_profiles as { full_name: string | null } | null;
               const featureNames = (orderItems ?? []).map((item) => {
-                const feature = item.features as { name: string } | null;
-                return feature?.name ?? "Unknown";
+                const feature = item.features as unknown as { title: string } | null;
+                return feature?.title ?? "Unknown";
               });
               const email = orderConfirmationEmail({
                 orderId,
                 totalUsd: orderData.total_usd ?? 0,
                 featureNames,
-                customerName: profile?.full_name ?? "Customer",
+                customerName: profileData?.full_name ?? "Customer",
               });
               sendEmail({ to: authUser.user.email, ...email });
             }
