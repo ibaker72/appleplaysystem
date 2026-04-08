@@ -10,12 +10,14 @@ export default async function AdminNewFeaturePage() {
   async function handleCreate(formData: FormData) {
     "use server";
     await requireAdmin();
+    const techGuide = String(formData.get("technician_guide")).trim();
     await createFeature({
       brand: String(formData.get("brand")),
       title: String(formData.get("title")),
       description: String(formData.get("description")),
       sessionMinutes: Number(formData.get("session_minutes")),
       basePriceUsd: Number(formData.get("base_price_usd")),
+      technicianGuide: techGuide || undefined,
     });
     redirect("/admin/features");
   }
@@ -88,6 +90,17 @@ export default async function AdminNewFeaturePage() {
               />
             </label>
           </div>
+
+          <label className="block text-sm text-white/75">
+            <span className="mb-2 block">Technician Guide</span>
+            <span className="mb-2 block text-xs text-white/40">Internal only — not visible to customers. Describe the exact coding steps, parameter names, and values the technician should use.</span>
+            <textarea
+              name="technician_guide"
+              rows={6}
+              placeholder={"1. Connect via BimmerCode > Expert Mode > HU_MGU\n2. Locate: carplay_status → set to aktiv\n3. Write coding — cycle ignition\n4. Verify in Settings > CarPlay"}
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-mono outline-none ring-electric focus:ring-1"
+            />
+          </label>
 
           <button
             type="submit"

@@ -63,7 +63,7 @@ export default async function TechnicianSessionPage({
         .single(),
       supabase
         .from("order_items")
-        .select("id, price_usd, features:feature_id(title, description)")
+        .select("id, price_usd, features:feature_id(title, description, technician_guide)")
         .eq("order_id", booking.order_id),
       supabase
         .from("setup_requirements")
@@ -180,15 +180,32 @@ export default async function TechnicianSessionPage({
           <h3 className="mb-3 text-sm font-medium text-white/70">Ordered Features</h3>
           <div className="space-y-2">
             {(orderItems ?? []).map((item) => {
-              type FeatureJoin = { title: string; description: string | null } | null;
+              type FeatureJoin = { title: string; description: string | null; technician_guide: string | null } | null;
               const feature = (Array.isArray(item.features) ? item.features[0] : item.features) as FeatureJoin;
               return (
-                <div key={item.id} className="rounded-xl bg-white/5 p-3">
-                  <p className="text-sm font-medium">{feature?.title ?? "Unknown"}</p>
-                  {feature?.description ? (
-                    <p className="mt-1 text-xs text-white/50">{feature.description}</p>
+                <details key={item.id} className="group rounded-xl bg-white/5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-3">
+                    <div>
+                      <p className="text-sm font-medium">{feature?.title ?? "Unknown"}</p>
+                      {feature?.description ? (
+                        <p className="mt-0.5 text-xs text-white/50">{feature.description}</p>
+                      ) : null}
+                    </div>
+                    {feature?.technician_guide ? (
+                      <span className="flex-shrink-0 rounded-full bg-electric/10 px-2 py-0.5 text-[10px] font-medium text-electric">
+                        Guide ▾
+                      </span>
+                    ) : (
+                      <span className="flex-shrink-0 text-[10px] text-white/25">No guide</span>
+                    )}
+                  </summary>
+                  {feature?.technician_guide ? (
+                    <div className="border-t border-white/10 px-3 pb-3 pt-2">
+                      <p className="mb-1 text-[10px] uppercase tracking-widest text-electric/60">Coding Procedure</p>
+                      <pre className="whitespace-pre-wrap text-xs leading-relaxed text-white/70">{feature.technician_guide}</pre>
+                    </div>
                   ) : null}
-                </div>
+                </details>
               );
             })}
           </div>

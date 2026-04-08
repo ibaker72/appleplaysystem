@@ -150,6 +150,59 @@ export function bookingReminderEmail(input: {
   return { subject, html, text };
 }
 
+export function sessionCompletionEmail(input: {
+  orderId: string;
+  customerName: string;
+  featureNames: string[];
+  completedAt: string;
+}) {
+  const { orderId, customerName, featureNames, completedAt } = input;
+  const subject = "Session Complete \u2014 Remote Code DE";
+  const formattedDate = new Date(completedAt).toLocaleString("en-US", {
+    dateStyle: "long",
+    timeStyle: "short",
+  });
+
+  const text = [
+    `Hi ${customerName},`,
+    "",
+    "Your remote coding session has been completed successfully.",
+    "",
+    `Order: ${orderId}`,
+    `Completed: ${formattedDate}`,
+    `Features activated: ${featureNames.join(", ")}`,
+    "",
+    "The features listed above are now active on your vehicle. Please restart your infotainment system if prompted.",
+    "",
+    "Thank you for choosing Remote Code DE.",
+    "",
+    "Remote Code // DE",
+  ].join("\n");
+
+  const html = layout(`
+    <h1 style="font-size:22px;font-weight:600;margin:0 0 16px;">Session Complete</h1>
+    <p style="font-size:15px;color:rgba(255,255,255,0.8);line-height:1.6;margin:0 0 24px;">
+      Hi ${escapeHtml(customerName)}, your remote coding session has been completed successfully.
+    </p>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-bottom:24px;">
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Order</div>
+      <div style="font-size:14px;margin-bottom:16px;">${escapeHtml(orderId)}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Completed</div>
+      <div style="font-size:14px;margin-bottom:16px;">${escapeHtml(formattedDate)}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Features Activated</div>
+      <div style="font-size:14px;">${featureNames.map(escapeHtml).join(", ")}</div>
+    </div>
+    <p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      The features listed above are now active on your vehicle. Please restart your infotainment system if prompted.
+    </p>
+    <p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;margin-top:12px;">
+      Thank you for choosing Remote Code DE.
+    </p>
+  `);
+
+  return { subject, html, text };
+}
+
 export function contactFormEmail(input: {
   senderName: string;
   senderEmail: string;

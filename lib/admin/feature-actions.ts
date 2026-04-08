@@ -8,6 +8,7 @@ const createFeatureSchema = z.object({
   description: z.string().trim().min(1).max(2000),
   sessionMinutes: z.number().int().positive(),
   basePriceUsd: z.number().positive(),
+  technicianGuide: z.string().trim().max(10000).optional(),
 });
 
 const updateFeatureSchema = z.object({
@@ -15,6 +16,7 @@ const updateFeatureSchema = z.object({
   description: z.string().trim().min(1).max(2000).optional(),
   sessionMinutes: z.number().int().positive().optional(),
   basePriceUsd: z.number().positive().optional(),
+  technicianGuide: z.string().trim().max(10000).optional().nullable(),
 });
 
 export async function createFeature(input: {
@@ -23,6 +25,7 @@ export async function createFeature(input: {
   description: string;
   sessionMinutes: number;
   basePriceUsd: number;
+  technicianGuide?: string;
 }) {
   const validated = createFeatureSchema.parse(input);
 
@@ -35,6 +38,7 @@ export async function createFeature(input: {
       description: validated.description,
       session_minutes: validated.sessionMinutes,
       base_price_usd: validated.basePriceUsd,
+      technician_guide: validated.technicianGuide || null,
     })
     .select("id")
     .single();
@@ -50,6 +54,7 @@ export async function updateFeature(
     description?: string;
     sessionMinutes?: number;
     basePriceUsd?: number;
+    technicianGuide?: string | null;
   }
 ) {
   z.string().uuid().parse(featureId);
@@ -61,6 +66,7 @@ export async function updateFeature(
   if (validated.description !== undefined) updates.description = validated.description;
   if (validated.sessionMinutes !== undefined) updates.session_minutes = validated.sessionMinutes;
   if (validated.basePriceUsd !== undefined) updates.base_price_usd = validated.basePriceUsd;
+  if ("technicianGuide" in validated) updates.technician_guide = validated.technicianGuide ?? null;
 
   const { error } = await supabase.from("features").update(updates).eq("id", featureId);
   if (error) throw new Error(`Failed to update feature: ${error.message}`);

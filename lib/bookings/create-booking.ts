@@ -31,7 +31,20 @@ export async function createBookingForOrder(orderId: string) {
     throw new Error(`Failed to create booking: ${error.message}`);
   }
 
-  await createDefaultSetupRequirements(data.id);
+  // Fetch vehicle brand so setup requirements are brand-specific
+  const { data: orderForBrand } = await supabase
+    .from("orders")
+    .select("vehicle_id, vehicles:vehicle_id(brand)")
+    .eq("id", orderId)
+    .single();
+
+  type VehicleJoin = { brand: string } | null;
+  const vehicleJoin = (Array.isArray((orderForBrand as Record<string, unknown> | null)?.vehicles)
+    ? ((orderForBrand as Record<string, unknown>).vehicles as VehicleJoin[])[0]
+    : (orderForBrand as Record<string, unknown> | null)?.vehicles as VehicleJoin);
+  const brand = vehicleJoin?.brand;
+
+  await createDefaultSetupRequirements(data.id, brand);
 
   // Send booking confirmation email (fire-and-forget)
   try {

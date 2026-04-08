@@ -39,11 +39,13 @@ export default async function AdminEditFeaturePage({
   async function handleUpdate(formData: FormData) {
     "use server";
     await requireAdmin();
+    const techGuide = String(formData.get("technician_guide")).trim();
     await updateFeature(featureId, {
       title: String(formData.get("title")),
       description: String(formData.get("description")),
       sessionMinutes: Number(formData.get("session_minutes")),
       basePriceUsd: Number(formData.get("base_price_usd")),
+      technicianGuide: techGuide || null,
     });
     revalidatePath(`/admin/features/${featureId}`);
     redirect("/admin/features");
@@ -122,6 +124,18 @@ export default async function AdminEditFeaturePage({
               />
             </label>
           </div>
+
+          <label className="block text-sm text-white/75">
+            <span className="mb-2 block">Technician Guide</span>
+            <span className="mb-2 block text-xs text-white/40">Internal only — not visible to customers. Describe the exact coding steps, parameter names, and values.</span>
+            <textarea
+              name="technician_guide"
+              rows={8}
+              defaultValue={(feature as Record<string, unknown>).technician_guide as string ?? ""}
+              placeholder={"1. Connect via app > Expert Mode\n2. Locate parameter → set value\n3. Write coding — cycle ignition\n4. Verify"}
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-mono outline-none ring-electric focus:ring-1"
+            />
+          </label>
 
           <button
             type="submit"
