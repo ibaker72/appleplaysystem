@@ -79,8 +79,9 @@ export async function POST(request: Request) {
               .maybeSingle();
 
             if (authUser?.user?.email && orderData) {
+              type FeatureJoin = { title: string } | null;
               const featureNames = (orderItems ?? []).map((item) => {
-                const feature = item.features as unknown as { title: string } | null;
+                const feature = (Array.isArray(item.features) ? item.features[0] : item.features) as FeatureJoin;
                 return feature?.title ?? "Unknown";
               });
               const email = orderConfirmationEmail({

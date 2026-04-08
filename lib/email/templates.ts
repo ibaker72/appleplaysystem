@@ -1,3 +1,12 @@
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function layout(body: string): string {
   return `<!DOCTYPE html>
 <html>
@@ -40,15 +49,15 @@ export function orderConfirmationEmail(input: {
   const html = layout(`
     <h1 style="font-size:22px;font-weight:600;margin:0 0 16px;">Order Confirmed</h1>
     <p style="font-size:15px;color:rgba(255,255,255,0.8);line-height:1.6;margin:0 0 24px;">
-      Hi ${customerName}, your order has been confirmed and payment received.
+      Hi ${escapeHtml(customerName)}, your order has been confirmed and payment received.
     </p>
     <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-bottom:24px;">
       <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Order</div>
-      <div style="font-size:14px;margin-bottom:16px;">${orderId}</div>
+      <div style="font-size:14px;margin-bottom:16px;">${escapeHtml(orderId)}</div>
       <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Total</div>
       <div style="font-size:14px;margin-bottom:16px;">$${totalUsd.toFixed(2)}</div>
       <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Features</div>
-      <div style="font-size:14px;">${featureNames.join(", ")}</div>
+      <div style="font-size:14px;">${featureNames.map(escapeHtml).join(", ")}</div>
     </div>
     <p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">
       We&rsquo;ll be in touch to schedule your remote coding session.
@@ -82,13 +91,13 @@ export function bookingConfirmationEmail(input: {
   const html = layout(`
     <h1 style="font-size:22px;font-weight:600;margin:0 0 16px;">Session Booked</h1>
     <p style="font-size:15px;color:rgba(255,255,255,0.8);line-height:1.6;margin:0 0 24px;">
-      Hi ${customerName}, your remote coding session has been created.
+      Hi ${escapeHtml(customerName)}, your remote coding session has been created.
     </p>
     <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-bottom:24px;">
       <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Booking</div>
-      <div style="font-size:14px;margin-bottom:16px;">${bookingId}</div>
+      <div style="font-size:14px;margin-bottom:16px;">${escapeHtml(bookingId)}</div>
       <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Order</div>
-      <div style="font-size:14px;">${orderId}</div>
+      <div style="font-size:14px;">${escapeHtml(orderId)}</div>
     </div>
     <p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;">
       You&rsquo;ll receive setup instructions and a reminder before your session.
@@ -127,16 +136,47 @@ export function bookingReminderEmail(input: {
   const html = layout(`
     <h1 style="font-size:22px;font-weight:600;margin:0 0 16px;">Session Tomorrow</h1>
     <p style="font-size:15px;color:rgba(255,255,255,0.8);line-height:1.6;margin:0 0 24px;">
-      Hi ${customerName}, your remote coding session is scheduled for tomorrow.
+      Hi ${escapeHtml(customerName)}, your remote coding session is scheduled for tomorrow.
     </p>
     <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-bottom:24px;">
       <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Scheduled Time</div>
-      <div style="font-size:14px;margin-bottom:16px;">${formattedTime}</div>
+      <div style="font-size:14px;margin-bottom:16px;">${escapeHtml(formattedTime)}</div>
       <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Order</div>
-      <div style="font-size:14px;">${orderId}</div>
+      <div style="font-size:14px;">${escapeHtml(orderId)}</div>
     </div>
-    <a href="${setupLink}" style="display:inline-block;background:#e2e2e2;color:#000;text-decoration:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:500;">Review Setup Instructions</a>
+    <a href="${escapeHtml(setupLink)}" style="display:inline-block;background:#e2e2e2;color:#000;text-decoration:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:500;">Review Setup Instructions</a>
   `);
 
   return { subject, html, text };
+}
+
+export function contactFormEmail(input: {
+  senderName: string;
+  senderEmail: string;
+  subject: string;
+  message: string;
+}) {
+  const { senderName, senderEmail, subject, message } = input;
+  const emailSubject = `Contact Form: ${subject}`;
+
+  const text = [
+    `From: ${senderName} <${senderEmail}>`,
+    `Subject: ${subject}`,
+    "",
+    message,
+  ].join("\n");
+
+  const html = layout(`
+    <h1 style="font-size:22px;font-weight:600;margin:0 0 16px;">New Contact Message</h1>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-bottom:24px;">
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">From</div>
+      <div style="font-size:14px;margin-bottom:16px;">${escapeHtml(senderName)} &lt;${escapeHtml(senderEmail)}&gt;</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Subject</div>
+      <div style="font-size:14px;margin-bottom:16px;">${escapeHtml(subject)}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Message</div>
+      <div style="font-size:14px;white-space:pre-wrap;">${escapeHtml(message)}</div>
+    </div>
+  `);
+
+  return { subject: emailSubject, html, text };
 }

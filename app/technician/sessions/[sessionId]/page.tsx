@@ -180,7 +180,8 @@ export default async function TechnicianSessionPage({
           <h3 className="mb-3 text-sm font-medium text-white/70">Ordered Features</h3>
           <div className="space-y-2">
             {(orderItems ?? []).map((item) => {
-              const feature = item.features as unknown as { title: string; description: string | null } | null;
+              type FeatureJoin = { title: string; description: string | null } | null;
+              const feature = (Array.isArray(item.features) ? item.features[0] : item.features) as FeatureJoin;
               return (
                 <div key={item.id} className="rounded-xl bg-white/5 p-3">
                   <p className="text-sm font-medium">{feature?.title ?? "Unknown"}</p>

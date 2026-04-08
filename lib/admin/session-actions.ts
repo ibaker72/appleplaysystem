@@ -70,6 +70,23 @@ export async function setRemoteSessionLink(bookingId: string, link: string) {
   if (error) throw new Error(`Failed to set session link: ${error.message}`);
 }
 
+export async function setSessionStartTime(bookingId: string, startsAt: string) {
+  uuidSchema.parse(bookingId);
+  const parsed = z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)).parse(startsAt);
+
+  const supabase = createAdminSupabaseClient();
+  const { error } = await supabase
+    .from("bookings")
+    .update({
+      starts_at: new Date(parsed).toISOString(),
+      status: "scheduled",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", bookingId);
+
+  if (error) throw new Error(`Failed to set start time: ${error.message}`);
+}
+
 export async function addTechnicianNote(bookingId: string, technicianId: string, note: string) {
   uuidSchema.parse(bookingId);
   uuidSchema.parse(technicianId);

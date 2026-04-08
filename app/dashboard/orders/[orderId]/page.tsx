@@ -109,11 +109,8 @@ export default async function CustomerOrderDetailPage({
             </thead>
             <tbody>
               {(items ?? []).map((item) => {
-                const feature = item.features as unknown as {
-                  title: string;
-                  description: string;
-                  session_minutes: number;
-                } | null;
+                type FeatureJoin = { title: string; description: string; session_minutes: number } | null;
+                const feature = (Array.isArray(item.features) ? item.features[0] : item.features) as FeatureJoin;
                 return (
                   <tr key={item.id} className="border-t border-white/5">
                     <td className="py-2 pr-4">

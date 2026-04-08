@@ -10,6 +10,7 @@ import {
   updateBookingStatus,
   setRemoteSessionLink,
   addTechnicianNote,
+  setSessionStartTime,
 } from "@/lib/admin/session-actions";
 
 const sessionStatusStyles: Record<string, string> = {
@@ -49,7 +50,13 @@ export default async function AdminSessionDetailPage({
     );
   }
 
-  const [{ data: order }, { data: setupReqs }, { data: notes }] = await Promise.all([
+  // Resolve technician IDs to display names
+  const technicianIds = (process.env.TECHNICIAN_USER_IDS ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+
+  const [{ data: order }, { data: setupReqs }, { data: notes }, { data: techProfiles }] = await Promise.all([
     supabase
       .from("orders")
       .select("id, customer_id, vehicle_id, status, total_usd, customer_profiles:customer_id(full_name, phone), vehicles:vehicle_id(brand, model, year, chassis, head_unit)")
@@ -65,7 +72,21 @@ export default async function AdminSessionDetailPage({
       .select("id, technician_id, note, created_at")
       .eq("booking_id", sessionId)
       .order("created_at", { ascending: false }),
+    technicianIds.length > 0
+      ? supabase
+          .from("customer_profiles")
+          .select("user_id, full_name")
+          .in("user_id", technicianIds)
+      : Promise.resolve({ data: [] as Array<{ user_id: string; full_name: string | null }> }),
   ]);
+
+  const techNameMap = new Map<string, string>(
+    (techProfiles ?? []).map((p) => [p.user_id, p.full_name ?? p.user_id.slice(0, 8)])
+  );
+  const technicians = technicianIds.map((id) => ({
+    id,
+    name: techNameMap.get(id) ?? id.slice(0, 8),
+  }));
 
   const customer = (order as Record<string, unknown> | null)?.customer_profiles as { full_name: string | null; phone: string | null } | null;
   const vehicle = (order as Record<string, unknown> | null)?.vehicles as { brand: string; model: string; year: number; chassis: string; head_unit: string | null } | null;
@@ -75,6 +96,15 @@ export default async function AdminSessionDetailPage({
     await requireAdmin();
     const status = String(formData.get("status"));
     await updateBookingStatus(sessionId, status);
+    revalidatePath(`/admin/sessions/${sessionId}`);
+  }
+
+  async function handleSetStartTime(formData: FormData) {
+    "use server";
+    await requireAdmin();
+    const startsAt = String(formData.get("starts_at")).trim();
+    if (!startsAt) return;
+    await setSessionStartTime(sessionId, startsAt);
     revalidatePath(`/admin/sessions/${sessionId}`);
   }
 
@@ -193,6 +223,34 @@ export default async function AdminSessionDetailPage({
         </div>
       ) : null}
 
+      {/* Schedule start time */}
+      <div className="surface rounded-premium p-5">
+        <h3 className="mb-3 text-sm font-medium text-white/70">Schedule Session Time</h3>
+        <form action={handleSetStartTime} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <input
+            name="starts_at"
+            type="datetime-local"
+            defaultValue={
+              booking.starts_at
+                ? new Date(booking.starts_at).toISOString().slice(0, 16)
+                : ""
+            }
+            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none ring-electric focus:ring-1"
+          />
+          <button
+            type="submit"
+            className="rounded-xl bg-silver px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white"
+          >
+            Set Time
+          </button>
+        </form>
+        {booking.starts_at ? (
+          <p className="mt-2 text-xs text-white/40">
+            Currently: {new Date(booking.starts_at).toLocaleString()}
+          </p>
+        ) : null}
+      </div>
+
       {/* Update booking status */}
       <div className="surface rounded-premium p-5">
         <h3 className="mb-3 text-sm font-medium text-white/70">Update Session Status</h3>
@@ -221,13 +279,28 @@ export default async function AdminSessionDetailPage({
       <div className="surface rounded-premium p-5">
         <h3 className="mb-3 text-sm font-medium text-white/70">Assign Technician</h3>
         <form action={handleAssignTechnician} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <input
-            name="technician_id"
-            type="text"
-            placeholder="Technician user ID"
-            defaultValue={booking.technician_id ?? ""}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none ring-electric focus:ring-1 sm:w-auto"
-          />
+          {technicians.length > 0 ? (
+            <select
+              name="technician_id"
+              defaultValue={booking.technician_id ?? ""}
+              className="w-full appearance-none rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none ring-electric focus:ring-1 sm:w-auto"
+            >
+              <option value="" className="bg-panel">Unassigned</option>
+              {technicians.map((t) => (
+                <option key={t.id} value={t.id} className="bg-panel">
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              name="technician_id"
+              type="text"
+              placeholder="Technician user ID"
+              defaultValue={booking.technician_id ?? ""}
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none ring-electric focus:ring-1 sm:w-auto"
+            />
+          )}
           <button
             type="submit"
             className="rounded-xl bg-silver px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white"
@@ -235,6 +308,9 @@ export default async function AdminSessionDetailPage({
             Assign
           </button>
         </form>
+        {technicians.length === 0 ? (
+          <p className="mt-2 text-xs text-white/40">Set TECHNICIAN_USER_IDS env var to enable dropdown.</p>
+        ) : null}
       </div>
 
       {/* Remote session link */}

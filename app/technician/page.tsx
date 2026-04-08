@@ -37,12 +37,14 @@ export default async function TechnicianPage() {
     .eq("status", "pending")
     .order("created_at", { ascending: true });
 
+  type OrderJoin = {
+    customer_id: string;
+    customer_profiles: { full_name: string | null } | null;
+    vehicles: { brand: string; model: string; year: number } | null;
+  };
+
   function renderBookingCard(booking: NonNullable<typeof assignedBookings>[number]) {
-    const order = booking.orders as unknown as {
-      customer_id: string;
-      customer_profiles: { full_name: string | null } | null;
-      vehicles: { brand: string; model: string; year: number } | null;
-    };
+    const order = (Array.isArray(booking.orders) ? booking.orders[0] : booking.orders) as OrderJoin;
 
     return (
       <Link

@@ -40,9 +40,10 @@ async function getAnalytics() {
     .from("order_items")
     .select("feature_id, features:feature_id(title)");
 
+  type FeatureJoin = { title: string } | null;
   const featureCounts = new Map<string, { name: string; count: number }>();
   for (const item of featurePopularity ?? []) {
-    const feature = item.features as unknown as { title: string } | null;
+    const feature = (Array.isArray(item.features) ? item.features[0] : item.features) as FeatureJoin;
     const name = feature?.title ?? "Unknown";
     const existing = featureCounts.get(item.feature_id) ?? { name, count: 0 };
     existing.count++;

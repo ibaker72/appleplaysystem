@@ -50,6 +50,32 @@ export async function saveVehicle(input: SaveVehicleInput) {
   return data;
 }
 
+export async function deleteVehicle(vehicleId: string, customerId: string) {
+  const supabase = createAdminSupabaseClient();
+
+  // Verify ownership before deleting
+  const { data: vehicle } = await supabase
+    .from("vehicles")
+    .select("id")
+    .eq("id", vehicleId)
+    .eq("customer_id", customerId)
+    .maybeSingle();
+
+  if (!vehicle) {
+    throw new Error("Vehicle not found or access denied.");
+  }
+
+  const { error } = await supabase
+    .from("vehicles")
+    .delete()
+    .eq("id", vehicleId)
+    .eq("customer_id", customerId);
+
+  if (error) {
+    throw new Error(`Failed to delete vehicle: ${error.message}`);
+  }
+}
+
 export async function getUserVehicles(customerId: string) {
   const supabase = createAdminSupabaseClient();
   const { data, error } = await supabase

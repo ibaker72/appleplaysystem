@@ -37,10 +37,11 @@ export async function GET(request: Request) {
 
   for (const booking of bookings ?? []) {
     try {
-      const order = booking.orders as unknown as {
+      type OrderJoin = {
         customer_id: string;
         customer_profiles: { full_name: string | null } | null;
       };
+      const order = (Array.isArray(booking.orders) ? booking.orders[0] : booking.orders) as OrderJoin;
 
       const { data: authUser } = await supabase.auth.admin.getUserById(order.customer_id);
       if (!authUser?.user?.email) continue;
